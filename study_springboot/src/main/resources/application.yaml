@@ -1,3 +1,5 @@
+debug: false
+
 management:
   endpoints:
     # 暴露 EndPoint 以供访问，有jmx和web两种方式，exclude 的优先级高于 include
@@ -59,11 +61,14 @@ management:
     prometheus: #19、以可以被Prometheus服务器抓取的格式显示metrics信息，默认开启
       enabled: true
 
-spring.boot.admin.client.url: http://localhost:8080
-
-debug: false
-
 spring:
+  boot:
+    admin:
+      client:
+        url: http://localhost:8080/admin
+      context-path: /admin
+
+
   task:
     execution:
       pool:
@@ -94,8 +99,8 @@ spring:
         max-active: 10
         min-idle: 5
 
-  mvc:
-    static-path-pattern: /static/**
+#  mvc:
+#    static-path-pattern: /static/**
 
 
 # 配置mybatis规则、使用MyBatisPlus则此项配置无效

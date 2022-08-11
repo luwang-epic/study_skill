@@ -23,25 +23,19 @@
 
 <div class="container">
 
-    <form class="form-signin" action="index.html" method="post" th:action="@{/login}">
+    <form class="form-signin" action="/login" method="post" >
         <div class="form-signin-heading text-center">
             <h1 class="sign-title">Sign In</h1>
             <img src="images/login-logo.png" alt=""/>
         </div>
         <div class="login-wrap">
-            <label style="color: red" th:text="${msg}"></label>
-            <input type="text" name="userName" class="form-control" placeholder="User ID" autofocus>
-            <input type="password" name="password" class="form-control" placeholder="Password">
+            <label style="color: red" th:text="${msg}">请登录</label>
+            <input type="text" name="username" class="form-control" />
+            <input type="password" name="password" class="form-control" />
             <button class="btn btn-lg btn-login btn-block" type="submit">
                 <i class="fa fa-check"></i>
             </button>
 
-            <div class="registration">
-                Not a member yet?
-                <a class="" href="registration.html">
-                    Signup
-                </a>
-            </div>
             <label class="checkbox">
                 <input type="checkbox" value="remember-me"> Remember me
                 <span class="pull-right">
@@ -73,14 +67,10 @@
             </div>
         </div>
         <!-- modal -->
-
     </form>
 
 </div>
 
-
-
-<!-- Placed js at the end of the document so the pages load faster -->
 
 <!-- Placed js at the end of the document so the pages load faster -->
 <script src="js/jquery-1.10.2.min.js"></script>
