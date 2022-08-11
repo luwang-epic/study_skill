@@ -25,7 +25,7 @@ import java.util.List;
 public class WebConfig {
 
     /**
-     * WebMvcConfigurer定制化SpringMVC的功能
+     * WebMvcConfigurer定制化SpringMVC的功能  通常情况下，让WebConfig直接实现WebMvcConfigurer类
      */
     @Bean
     public WebMvcConfigurer webMvcConfigurer(){
