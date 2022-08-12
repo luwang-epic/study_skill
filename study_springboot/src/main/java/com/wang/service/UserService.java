@@ -1,4 +1,4 @@
-package com.wang.user;
+package com.wang.service;
 
 import com.wang.mapper.UserMapper;
 import com.wang.model.User;

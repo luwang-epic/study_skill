@@ -1,7 +1,7 @@
 package com.wang.controller;
 
 import com.wang.model.User;
-import com.wang.user.UserService;
+import com.wang.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;

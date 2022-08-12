@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 /**
  * 由于redis已经关闭了，所以排查这个自动配置，否则由于连不上redis会导致服务启动失败
  */
-@SpringBootApplication (exclude = RedisAutoConfiguration.class)
+@SpringBootApplication (exclude = {RedisAutoConfiguration.class})
 @EnableAdminServer
 @EnableScheduling
 public class StudySpringbootApplication {
