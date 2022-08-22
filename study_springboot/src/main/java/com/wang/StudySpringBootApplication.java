@@ -13,10 +13,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication (exclude = {RedisAutoConfiguration.class})
 @EnableAdminServer
 @EnableScheduling
-public class StudySpringbootApplication {
+public class StudySpringBootApplication {
 
     public static void main(String[] args) {
-        ConfigurableApplicationContext context = SpringApplication.run(StudySpringbootApplication.class, args);
+        ConfigurableApplicationContext context = SpringApplication.run(StudySpringBootApplication.class, args);
 
         String[] beanDefinitionNames = context.getBeanDefinitionNames();
         for (String beanName : beanDefinitionNames) {

@@ -12,6 +12,9 @@
         <module>study_flink</module>
         <module>study_springboot</module>
         <module>study_algorithm</module>
+        <module>study_jvm</module>
+        <module>study_spark</module>
+        <module>study_zookeeper</module>
     </modules>
 
     <properties>
