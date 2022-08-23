@@ -8,6 +8,7 @@ sc.textFile("D:\\idea_project\\study_skill\\file\\wc.text").flatMap(_.split(" ")
 
 .\bin\spark-submit --class org.apache.spark.examples.SparkPi --master local[2] ./examples/jars/spark-examples_2.12-3.0.0.jar 10
 
+ 如果想要打印spark日志，可以将log4j.properties中的日志级别改为INFO，或者删除该文件，默认为INFO级别
  */
 
 object WordCountSample {
