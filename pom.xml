@@ -15,6 +15,7 @@
         <module>study_jvm</module>
         <module>study_spark</module>
         <module>study_zookeeper</module>
+        <module>study_hbase</module>
     </modules>
 
     <properties>

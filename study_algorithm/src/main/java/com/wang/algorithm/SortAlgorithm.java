@@ -3,6 +3,19 @@ package com.wang.algorithm;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+/**    一些常见的排序算法
+ *   主要包括 如下几类  ：
+ *     1. 插入排序  ：    直接插入排序
+ *     				希尔排序
+ *     2. 选择排序  ：     简单选择排序
+ *     				堆排序
+ *     3.交换排序     ：    冒泡排序
+ *     			  ：     快速排序
+ *     4.归并排序
+ *
+ *     5.基排序
+ *
+ */
 public class SortAlgorithm {
 
     void quickSort(int[] nums, int start, int end) {
@@ -10,30 +23,12 @@ public class SortAlgorithm {
             int base = nums[start];
             int low = start;
             int high = end;
-            boolean isLeft = false;
             while (low < high) {
-//                if (!isLeft && nums[high] < base) {
-//                    nums[low] = nums[high];
-//                    low++;
-//                    isLeft = true;
-//                } else if (!isLeft) {
-//                    high--;
-//                }
-
                 // 直到右边比基准小，交换
                 while (low < high && nums[high] > base) {
                     high--;
                 }
                 nums[low] = nums[high];
-
-//                if (isLeft && low < high && nums[low] > base) {
-//                    nums[high] = nums[low];
-//                    high--;
-//                    isLeft = false;
-//                } else if (isLeft && low < high) {
-//                    low++;
-//                }
-
                 // 直到左边比基准大，交换
                 while (low < high && nums[low] < base) {
                     low++;

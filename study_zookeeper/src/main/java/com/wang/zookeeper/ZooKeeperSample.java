@@ -9,6 +9,9 @@ import org.apache.zookeeper.data.Stat;
 
 import java.util.Objects;
 
+/**
+ * 原生的zookeeper使用，一般使用封装好的curator框架来操作zk
+ */
 public class ZooKeeperSample {
     public static final String ZK_HOST = "localhost:2181";
 
@@ -19,7 +22,7 @@ public class ZooKeeperSample {
         zkClient = new ZooKeeper(ZK_HOST, 2000, new Watcher() {
             @Override
             public void process(WatchedEvent watchedEvent) {
-
+                // 默认监听器，其他地方如果比采用构造监听对象，而是采用true的方式监听，则使用这个监听器
             }
         });
     }

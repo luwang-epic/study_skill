@@ -4,7 +4,10 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 /**
- * 堆结构
+ * 堆通常是一个可以被看做一棵树的数组对象。堆总是满足下列性质：
+ *   堆中某个结点的值总是不大于或不小于其父结点的值；
+ *   堆总是一棵完全二叉树。
+ * 将根结点最大的堆叫做最大堆或大根堆，根结点最小的堆叫做最小堆或小根堆。
  */
 public class HeapStruct {
     int[] nums;

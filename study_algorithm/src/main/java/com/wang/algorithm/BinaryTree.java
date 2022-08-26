@@ -61,12 +61,14 @@ public class BinaryTree<T> {
         visitNode(root);
 
         //再访问左子树
-        if(root.lchild != null)
+        if(root.lchild != null) {
             preOrderTraverse(root.lchild);
+        }
 
         //最后访问右子树
-        if(root.rchild != null)
+        if(root.rchild != null) {
             preOrderTraverse(root.rchild);
+        }
     }
 
 
@@ -111,15 +113,17 @@ public class BinaryTree<T> {
      */
     public static void inOrderTraverse(Node<?> root) {
         //先访问左子树
-        if (root.lchild != null)
+        if (root.lchild != null) {
             inOrderTraverse(root.lchild);
+        }
 
         // 再访问根节点
         visitNode(root);
 
         // 最后访问右子树
-        if (root.rchild != null)
+        if (root.rchild != null) {
             inOrderTraverse(root.rchild);
+        }
     }
 
     /**
@@ -131,9 +135,10 @@ public class BinaryTree<T> {
 
         while(!stack.isEmpty()){
             //先访问左子树
-            Node<?> node;
-            while((node=stack.peek()) != null){
-                stack.push(node.lchild);
+            Node<?> node = stack.peek();
+            while(node != null){
+                node = node.lchild;
+                stack.push(node);
             }
             //空指针退栈
             stack.pop();
@@ -162,12 +167,14 @@ public class BinaryTree<T> {
      */
     private static void postOrderTraverse(Node<?> root) {
         // 先访问左子树
-        if (root.lchild != null)
+        if (root.lchild != null) {
             postOrderTraverse(root.lchild);
+        }
 
         // 再访问右子树
-        if (root.rchild != null)
+        if (root.rchild != null) {
             postOrderTraverse(root.rchild);
+        }
 
         // 最后访问根节点
         visitNode(root);
