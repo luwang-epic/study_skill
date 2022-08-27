@@ -31,11 +31,12 @@ public class ThymeleafController {
     public String main(String username, String password, HttpSession session, Model model) { //RedirectAttributes
         if (StringUtils.hasLength(username) && StringUtils.hasLength(password)) {
             //把登陆成功的用户保存起来
-            session.setAttribute("username", username);
-            session.setAttribute("password", password);
+            session.setAttribute("login_user", username);
+            System.out.println("登录成功...");
             //登录成功重定向到main.html;  重定向防止表单重复提交
             return "redirect:/main.html";
         } else {
+            System.out.println("登录失败...");
             model.addAttribute("msg", "账号密码错误");
             //回到登录页面
             return "first";
@@ -53,10 +54,12 @@ public class ThymeleafController {
 
         log.info("当前方法是：{}", "mainPage");
         //是否登录。  一般使用拦截器，过滤器来实现，这里简单模拟下
-        Object loginUser = session.getAttribute("username");
+        Object loginUser = session.getAttribute("login_user");
         if (Objects.nonNull(loginUser)) {
+            System.out.println("已经登录...");
             return "main";
         } else {
+            System.out.println("未登录...");
             //回到登录页面
             model.addAttribute("msg", "请重新登录");
             return "first";
