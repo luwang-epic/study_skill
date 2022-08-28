@@ -2,10 +2,16 @@ package com.wang.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -26,15 +32,62 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
+     * 提供用户密码已经对应的权限信息等
+     */
+    @Bean
+    @Override
+    protected UserDetailsService userDetailsService() {
+        // 内存存放用户认证信息
+//        InMemoryUserDetailsManager userDetailsService = new InMemoryUserDetailsManager();
+//        userDetailsService.createUser(User.withUsername("admin").password(passwordEncoder.encode("admin")).authorities("get", "add", "update", "delete", "oauth").build());
+//        userDetailsService.createUser(User.withUsername("get").password(passwordEncoder.encode("get")).authorities("get").build());
+//        return userDetailsService;
+
+        // 实际使用下面的方式从数据库获取或者redis缓存获取（单独定义一个类注入到spring中，不需要重载userDetailsService这个方法了）
+        return new UserDetailsService() {
+            @Override
+            public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+                // 这里使用username从数据库或者缓存获取用户数据
+
+                if ("admin".equals(username)) {
+                    return User.withUsername("admin").password(passwordEncoder.encode("admin")).authorities("get", "add", "update", "delete", "oauth").build();
+                }
+
+                if ("get".equals(username)) {
+                    return User.withUsername("get").password(passwordEncoder.encode("get")).authorities("get").build();
+                }
+
+                return null;
+            }
+        };
+    }
+
+    /**
+     * 注入到spring中，后续oauth认证使用密码模式的时候需要使用
+     */
+    @Bean
+    @Override
+    protected AuthenticationManager authenticationManager() throws Exception {
+        return super.authenticationManager();
+    }
+
+    /**
      * 认证账户信息
      * @param auth the {@link AuthenticationManagerBuilder} to use
      * @throws Exception
      */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication().withUser("admin").password(passwordEncoder.encode("admin")).authorities("get", "add", "update", "delete")
-                .and().withUser("get").password(passwordEncoder.encode("get")).authorities("get")
-                .and().passwordEncoder(passwordEncoder);
+        // 可以实现userDetailsService方法来代替，即提供UserDetailsService的实现类；那么也可以自定义一个继承UserDetailsService的类，加载到spring容器中
+//        auth.inMemoryAuthentication().withUser("admin").password(passwordEncoder.encode("admin")).authorities("get", "add", "update", "delete")
+//                .and().withUser("get").password(passwordEncoder.encode("get")).authorities("get")
+//                .and().passwordEncoder(passwordEncoder);
+
+        // 如果通过@Bean注入到spring容器了，AuthenticationManagerBuilder也可以自动注入，否则需要如下的方式手动注入
+        // 设置到AuthenticationManagerBuilder类中
+//        auth.userDetailsService(userDetailsService());
+        super.configure(auth);
     }
 
 
@@ -57,21 +110,34 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         非常美观而且提供多种登录方式。这就需要SpringSecurity支持我们自己定制登录页面,
         spring boot2.0以上版本（依赖Security 5.X版本）默认会生成一个登录页面.
      */
+    /**
+     * 配置授权信息
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        System.out.println("SecurityConfig HttpSecurity configure......");
+
         // 配置认证方式为 token form 表单 设置为httpBasic模式(这种模式没有登录，浏览器胡自动弹出登录框)
 //        http.authorizeRequests().antMatchers("/**").fullyAuthenticated().and().httpBasic();
         // formLogin模式，spring security会自动生成登录页面
 //        http.authorizeRequests().antMatchers("/**").fullyAuthenticated().and().formLogin();
 
+        // 这里的检查是否有权限是有顺序的，从上到下的，因此如果url匹配有多个，那么会以第一个规则为准
         http.authorizeRequests().antMatchers("/security/get").hasAnyAuthority("get")
                 .antMatchers("/security/add").hasAnyAuthority("add")
                 .antMatchers("/security/update").hasAnyAuthority("update")
                 .antMatchers("/security/delete").hasAnyAuthority("delete")
+                .antMatchers("/oauth/test").hasAnyAuthority("oauth")
                 .antMatchers("/login", "/oauth/**", "/static/**", "/css/**", "/js/**", "/images/**", "/plugins/**", "**/favicon.ico").permitAll()
                 .antMatchers("/**").fullyAuthenticated()
-                .and().formLogin().and()
+                // 登录设置， /security/success为post方法  如果设置了successForwardUrl，调用授权接口/oauth/authorize时需要登录后重新调用一次，不会直接到授权页面
+                .and().formLogin()//.successForwardUrl("/security/success")
+                .and().logout().logoutUrl("/logout").logoutSuccessUrl("/login")
                 // 关闭跨域请求防护
-                .csrf().disable();
+                .and().csrf().disable();
+
+        // 默认也是这个策略，需要时创建一个session，登录时会创建session保证回话状态；
+        // 如果是使用token等方式认证，可以设置为不需要创建session
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
     }
 }
