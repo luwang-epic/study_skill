@@ -1,9 +1,9 @@
 package com.wang.neo4j;
 
-import com.wang.model.AnimalNeo4jNode;
 import com.wang.model.AnimalRelationshipNeo4jNode;
-import com.wang.service.AnimalNeo4jNodeRepository;
 import com.wang.service.AnimalRelationshipNeo4jNodeRepository;
+import com.wang.model.AnimalNeo4jNode;
+import com.wang.service.AnimalNeo4jNodeRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
