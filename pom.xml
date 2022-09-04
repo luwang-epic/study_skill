@@ -12,11 +12,12 @@
         <module>study_flink</module>
         <module>study_springboot</module>
         <module>study_algorithm</module>
-        <module>study_jvm</module>
+        <module>study_java</module>
         <module>study_spark</module>
         <module>study_zookeeper</module>
         <module>study_hbase</module>
         <module>study_spring_security</module>
+        <module>study_janusgraph</module>
     </modules>
 
     <properties>

@@ -2,7 +2,7 @@ package com.wang.leetcode.offer;
 
 public class SolutionOffer18 {
 
-    public class ListNode {
+    private class ListNode {
         int val;
         ListNode next;
 

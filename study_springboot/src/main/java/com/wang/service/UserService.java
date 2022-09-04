@@ -1,7 +1,7 @@
 package com.wang.service;
 
-import com.wang.mapper.UserMapper;
 import com.wang.model.User;
+import com.wang.mapper.UserMapper;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Service;
