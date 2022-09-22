@@ -58,6 +58,9 @@ object SparkSqlSample {
     val userDataset: Dataset[User] = userDataFrame.as[User]
     println("Dataset to DataFrame ---->")
     userDataset.toDF().show()
+    // 显示执行计划，包括：逻辑计划，优化后的逻辑计划，物理计划
+
+//    userDataset.explain("extended")
 
     // RDD <=> DataSet
     val userDatasetFromRdd: Dataset[User] = userRdd.map {

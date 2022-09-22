@@ -1,9 +1,8 @@
 package com.wang.algorithm;
 
-/*
-二分法
+/**
+ * 二分法
  */
-
 public class Dichotomy {
 
     boolean binarySearch(int[] nums, int target) {

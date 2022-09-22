@@ -22,9 +22,16 @@ public class NioClientSample {
             }
         }
 
-        ByteBuffer byteBuffer = ByteBuffer.wrap("test".getBytes("UTF-8"));
+        ByteBuffer byteBuffer = ByteBuffer.wrap("message1".getBytes("UTF-8"));
         socketChannel.write(byteBuffer);
         byteBuffer.clear();
+
+        Thread.sleep(5000);
+
+        byteBuffer = ByteBuffer.wrap("message2".getBytes("UTF-8"));
+        socketChannel.write(byteBuffer);
+
+
         socketChannel.close();
     }
 }
