@@ -4,6 +4,15 @@ import org.junit.jupiter.api.Test;
 
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -66,6 +75,12 @@ public class BaseGrammar {
     }
 
     /*
+    Java创建对象的4中方式：
+        new对象
+        通过反射创建对象
+        通过clone方法创建对象
+        通过序列化方式创建对象
+
     Java为了避免产生大量的String对象，设计了一个字符串常量池。工作原理是这样的，创建一个字符串时，
     JVM首先为检查字符串常量池中是否有值相等的字符串，如果有，则不再创建，直接返回该字符串的引用地址，
     若没有，则创建，然后放到字符串常量池中，并返回新创建的字符串的引用地址。所以上面s1与s2引用地址相同。
@@ -122,6 +137,15 @@ public class BaseGrammar {
         double e = i;
         // 不可以将char int double直接赋值给string
         String s2 = ch + "";
+    }
+
+    @Test
+    public void mathGrammar() {
+        System.out.println(Math.round(-1.5));
+        System.out.println(Math.floor(-1.5));
+
+        System.out.println(Math.round(1.5));
+        System.out.println(Math.floor(1.5));
     }
 
     @Test
@@ -311,6 +335,11 @@ public class BaseGrammar {
         int count();
     }
 
+    @Test
+    public void annotationGrammar() {
+
+    }
+
     /*
     并发锁总共有4种状态：无锁状态、偏向锁状态、轻量级锁状态和重量级锁状态，
     每种状态在并发竞争情况下需要消耗的资源由低到高，性能由高到低。
@@ -334,8 +363,45 @@ public class BaseGrammar {
     如果还没有正常获取到要使用的对象，此时就会把锁从轻量级升级为重量级锁，
     此过程就构成了 synchronized 锁的升级。
 
-
+    AbstractQueuedSynchronizer类（AQS）查看AbstractQueuedSynchronizerDemo类
      */
+
+    /*
+    用户线程和守护线程几乎一样，唯一的不同之处在于如果用户线程已经全部退出运行，只剩下守护线程存在了,
+    JVM也就退出了。因为当所有非守护线程结束时，没有了被守护者，守护线程也就没有工作可做，
+    当然也就没有继续执行的必要了，程序就会终止，同时会杀死所有的"守护线程"，
+    也就是说只要有任何非守护线程还在运行，程序就不会终止
+
+    需要注意：守护线程和创建它的线程没有关系
+     */
+    @Test
+    public void daemonThread() throws Exception {
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        Thread outerThread = new Thread(() -> {
+            // 构建一些守护线程，并运行
+            Thread daemonThread = new Thread(() -> {
+                try {
+                    countDownLatch.await();
+                    System.out.println("do something");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            daemonThread.setDaemon(true);
+            daemonThread.start();
+
+            // 父线程结束
+            System.out.println("outerThread线程运行结束");
+        });
+        outerThread.setName("outerThread");
+        outerThread.start();
+
+        Thread.sleep(1000);
+        countDownLatch.countDown();
+
+        Thread.sleep(2000);
+        System.out.println("主线程结束");
+    }
 
     private static class InterruptThread extends Thread {
         private Boolean flag = true;
@@ -388,6 +454,9 @@ public class BaseGrammar {
 
         // 如果没有抛出异常，则isInterrupted方法返回true；
         // 因为上面调用了中断，会设置中断标志，但是如果异常抛出了InterruptedException异常，会将中断标志清除
+        // interrupted(): 测试当前线程是否已经中断。线程的“中断状态”由该方法清除。
+        //                换句话说，如果连续两次调用该方法，则第二次调用将返回 false。
+        // isInterrupted(): 测试线程是否已经中断。线程的“中断状态”不受该方法的影响。
         if (t1.isInterrupted()) {
             System.out.println("线程处于中断状态......");
         } else {
@@ -422,6 +491,59 @@ public class BaseGrammar {
     }
 
     @Test
+    public void waitNotifyNotifyAllGrammar() throws Exception {
+        /*
+        首先，wait()方法内部是释放锁的，因此调用方法之前之前要先获得锁，
+        而锁在同步块开始的时候获得，结束时释放，即同步块内为持有锁的阶段。
+
+        现在我们考虑下这个潜在的竞争条件怎么解决。可以通过使用Java提供的synchronized关键字和锁来解决这个竞争条件。
+        为了调用wait()，notify()和notifyAll()方法，我们必须获取调用这些方法的对象上的锁。
+        由于wait()方法在等待前释放了锁并且在wait()方法返回之前重新获得了锁，
+        我们必须使用这个锁来确保检查条件（缓冲区是否已满）和设置条件（从缓冲区取产品）是原子的，
+        而这可以通过同步块或者同步方法实现。
+
+        wait是让使用wait方法的对象等待，暂时先把对象锁给让出来，给其它持有该锁的对象用，
+        其它对象用完后再告知（notify）等待的那个对象可以继续执行了，因此，只有在synchronized块中才有意义
+        (否则，如果大家并不遵循同步机制，那还等谁呢？根本没人排队，也就谈不上等待和唤醒了)
+         */
+
+        Object lock = new Object();
+
+        new Thread(() -> {
+            synchronized (lock) {
+                try {
+                    // do something
+                    Thread.sleep(5000);
+
+                    System.out.println("做完某件事，条件达成，并唤醒等待的线程");
+                    // 只是通知wait线程条件达成了，可以继续运行了，但是方法内部并不释放锁
+                    // 因此，wait并不能立马获取到锁，然后执行，而是需要等待这个方法所在的代码块执行完成后释放锁，
+                    // wait方法才能获取到锁，然后继续后续工作
+                    lock.notify();
+                    // lock.notifyAll();
+
+                    System.out.println("notify线程继续后续工作");
+                    Thread.sleep(3000);
+                    System.out.println("notify线程完成后续工作");
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        synchronized (lock) {
+            // 没有等待对象，执行notify操作无实际影响
+            lock.notify();
+            System.out.println("在wait中会释放lock锁，然后等待，直到其他线程完成条件后释放锁，然后获取锁后再执行后续操作");
+            lock.wait();
+            System.out.println("条件满足后，wait线程做某些工作");
+            Thread.sleep(5000);
+            System.out.println("条件满足后，wait线程做完工作");
+        }
+    }
+
+    @Test
     public void jvmGrammar() {
         /*
         可以通过 java.lang.Runtime 类中与内存相关方法来获取剩余的内存，总内存及最大堆内存。
@@ -445,14 +567,213 @@ public class BaseGrammar {
         所以ConcurrentHashMap在性能以及安全性方面更加有优势。
         即使在遍历map时，如果其他线程试图对map进行数据修改，也不会抛出ConcurrentModificationException
 
-    HashSet 和 TreeSet
-        TreeSet和hashset都不可放2个相同的元素
+    ConcurrentHashMap 和 HashTable
+        ConcurrentHashMap与HashTable都可以用于多线程的环境，但是当Hashtable的大小增加到一定的时候，
+        性能会急剧下降，因为迭代时需要被锁定很长时间。因为ConcurrentHashMap引入了分割（segmentation），
+        不论它变得多么大，仅仅需要锁定map的某个部分，而其他的线程不需要等到迭代完成才能访问map。
+        简而言之，在迭代的过程中，ConcurrentHashMap仅仅锁定map的某个部分，而Hashtable则会锁定整个map。
+
+        HashTable虽然性能上不如ConcurrentHashMap，单并不能完全被取代，两者的迭代器的一致性不同的，
+        HashTable的迭代器是强一致性的，而ConcurrentHashMap是弱一致性的。
+        ConcurrentHashMap的get，clear，iterator都是弱一致性的。
+
+        get方法是弱一致的，是什么含义？可能你期望往ConcurrentHashMap底层数据结构中加入一个元素后，
+        立马能对get可见，但ConcurrentHashMap并不能如你所愿。换句话说，put操作将一个元素加入到底层数据结构后，
+        get可能在某段时间内还看不到这个元素，若不考虑内存模型，单从代码逻辑来看，却是应该可以看到的。
+
+    HashSet 和 TreeSet 和 ListHashSet
+        TreeSet 和 Hashset 和 ListHashSet 都不可放2个相同的元素，都不是线程安全的
         TreeSet底层是TreeMap实现的，很多api都是利用TreeMap来实现的，数据是自动排好序的，不允许放入null值。
-        HashSet底层是HashMap实现的，很多api都是利用HashMap来实现的，数据是无序的，可以放入null，但只能放入一个null
+        HashSet底层是HashMap实现的，很多api都是利用HashMap来实现的，数据是自动排好序的，可以放入null，但只能放入一个null
+        ListHashSet底层是LinkedHashMap, 很多api都是利用HashMap来实现的，数据是无序的，可以放入null，但只能放入一个null
+            根据元素的hashCode值来决定元素的存储位置，但是它同时使用链表维护元素的次序。
+            也就是说，当遍历该集合时候，LinkedHashSet将会以元素的添加顺序访问集合的元素。
+
+    线程安全的Set：
+        1. Collections.synchronizedSet(new HashSet<>());
+        2. 使用JUC包里面的CopyOnWriteArraySet
+            CopyOnWriteArraySet使用Array而不是HashMap来存储数据。
+            这意味着像contains()或remove()这样的操作有 O(n) 的复杂度，
+            而当使用由ConcurrentHashMap 支持的 Set 时，复杂度是 O(1)。
+        3. 通过new ConcurrentHashMap<>().keySet() 或者 通过new ConcurrentHashMap<>().keySet("默认value值") 来实现的
+            但是如果通过无参数的keySet()这种方式来创建一个集合，那么这个集合是不能添加元素的（可以通过map对象来修改）
+        4. 通过Collections.newSetFromMap(new ConcurrentHashMap<>())创建集合
+
+    BlockingQueue （参考：https://blog.csdn.net/Jiangtagong/article/details/121855261）
+        队列是一种常见的数据结构，Java中以Queue的形式存在，继承Collection。
+        而BlockingQueue又继承Queue，是一种具有阻塞线程功能的特殊队列。
+
+        BlockingQueue的实现是基于ReentrantLock，最常用的场景是：生产者/消费者模式，
+        不需要额外的实现线程的同步和唤醒。场景的几种阻塞队列：
+        1. ArrayBlockingQueue：由数组组成的有界阻塞队列
+            由数组结构实现，队列的容量是固定的。存、取数据默认使用一把非公平锁，无法实现真正意义上的存、取数据的并发执行。
+            由于是数组实现，容量固定不变，因此不容易出现内存占用率过高等问题，但如果容量过小，取数据比存数据的数据慢，
+            这样会造成很多线程进入阻塞状态，可以使用offer()方法达到不阻塞线程，在高并发、吞吐量高的情况下，由于存、取共用一把锁，不推荐使用。
+        2. LinkedBlockingQueue：由链表组成的有界阻塞队列
+            由链表结构实现，队列容量默认Integer.MAX_VALUE，存、取数据的操作分别用于独立的锁，可以实现存、取的并发执行。
+            基于链表实现，数据的新增和移除速度比数组快，但是每次存、取数据都会有Node对象的新建和移除，因此也会存在GC影响性能的可能。
+            默认容量很大，因此存储数据的线程基本不会阻塞，但是取数据的速度过低，内存占用可能会飙升。
+            存、取操作锁分离，所以使用有并发和吞吐量要求的场景。
+            Executors,newFixedThreadPool()线程池的默认队列就是使用该类型的
+        3. LinkedTransferQueue：由链表组成的无界队列
+
+        4. PriorityBlockingQueue：优先级排序的无界阻塞队列
+            基于数组实现，队列容量最大值为Integer.MAX_VALUE-8（-8是因为数组的对象头）。根据传入的优先级进行排序，保证优先级来消费。
+            优先级阻塞队列中存在一次排序，根据优先级来将数据放入到头部或者尾部；
+            排序带来的损耗因素，由二叉树最小堆排序算法来降低。
+        5. DelayQueue：优先级排序的无界阻塞队列
+            延迟队列，基于优先级队列来实现存储元素，必须实现Delayed接口（Delayed接口继承了Comparable接口）
+            由于基于优先级队列实现，这个优先级是根据时间排序的，比如：订单超时取消功能。用户订单未支付开始倒计时。
+
+            一些使用见：com.wang.jdk.collection.DelayQueueDemo
+        6. SynchronousQueue：不存储元素的阻塞队列
+            利用双栈双队列算法的无空间队列或栈任何一个对SynchronousQueue写需要等到一个对SynchronousQueue的读操作，
+            任何一个个读操作需要等待一个写操作。没有容量，是无缓冲等待队列，是一个不存储元素的阻塞队列，会直接将任务交给消费者。
+            可以理解成交换通道，不存储任何元素，提供者和消费者是需要组队完成工作，缺少任何一个将会阻塞线程，直到等到配对为止。
+            Executors.newCachedThreadPool()使用该类型队列
+
+            一些使用见：com.wang.jdk.collection.DelayQueueDemo
+        7. LinkedBlockingDeque：由链表组成的双端阻塞队列
+
+
+    HashMap在多线程下会出现死循环和丢数据等问题
+        主要是多线程同时put时，如果同时触发了rehash操作，会导致HashMap中的链表中出现循环节点（同时也可能会丢失数据），
+        进而使得后面get的时候（get一个不在链表成环的桶中的元素），会死循环。
+        （参考：https://blog.csdn.net/hyq413950612/article/details/122309301）
+
+
+    一些集合类的使用看com.wang.jdk.collection包下的示例
      */
     @Test
-    public void collectionGrammar() {
+    public void jdkSetGrammar() {
+        ConcurrentHashMap<String, String> concurrentHashMap = new ConcurrentHashMap<>();
+        concurrentHashMap.clear();
+        // 这种方式创建的Set，与ConcurrentHashMap中的Set是同一个对象，因此会互相影响
+        // 支持向Set中添加和删除元素，会反映到map中，通过Set添加元素时，该元素key在map中对应的value为传入的值("default")
+        // 由于ConcurrentHashMap是线程安全的，所有对应的Set也是线程安全的
+        Set<String> concurrentSetWithDefaultValue = concurrentHashMap.keySet("default");
+        concurrentSetWithDefaultValue.add("a");
+        concurrentSetWithDefaultValue.add("b");
+        concurrentHashMap.put("c", "cc");
+        concurrentHashMap.put("d", "dd");
+        concurrentSetWithDefaultValue.remove("a");
+        concurrentSetWithDefaultValue.remove("c");
+        System.out.println("---------------------------");
+        // 输出: [b, d]
+        System.out.println(concurrentSetWithDefaultValue);
+        // 输出: {b=default, d=dd}
+        System.out.println(concurrentHashMap);
 
+        concurrentHashMap.clear();
+        // 这种方式创建的Set，与ConcurrentHashMap中的Set也是同一个对象，因此会互相影响
+        // 不支持向Set添加新元素。因此，如果我们尝试调用add()或addAll() 之类的方法，我们将得到 UnsupportedOperationException。
+        // 但是remove(object)或clear()之类的操作是支持的，可以正常工作，
+        // 但我们需要注意Set上的任何更改都将反映在原始映射map中
+        Set<String> concurrentSet = concurrentHashMap.keySet();
+        // 报异常：UnsupportedOperationException
+        // 可以看提出的KeySetView.add方法，如果没有给默认的value，value为空，而add方法当对象中value为空时会抛异常
+        //concurrentSet.add("a");
+        concurrentHashMap.put("b", "bb");
+        concurrentHashMap.put("c", "bb");
+        concurrentSet.remove("c");
+        System.out.println("---------------------------");
+        // 输出: [b]
+        System.out.println(concurrentSet);
+        // 输出: {b=bb}
+        System.out.println(concurrentHashMap);
+
+        // 通过Collections来创建线程安全的Set
+        // 底层是通过内部类SetFromMap覆盖Set方法，然后调用map的方法或者该map对应的set对象的方法来实现（具体看源码）
+        // 由于传入的ConcurrentHashMap是线程安全的，所以Set也是线程安全的
+        Set<String> concurrentSetByCollections = Collections.newSetFromMap(new ConcurrentHashMap<>(16));
+        concurrentSetByCollections.add("a");
+        System.out.println("---------------------------");
+        // 输出: [a]
+        System.out.println(concurrentSetByCollections);
+
+    }
+
+    @Test
+    public void jdkArrayListGrammar() {
+        List<String> strs = new ArrayList<>();
+        strs.add("a");
+        strs.add("b");
+        strs.add("c");
+        // 不会抛异常，remove方法中没有检查，但是只能输出a,c;
+        // 因为移除a之后大小变为2了，b,c都前移了一位，输出a后，i变成2，所以b就输出不了了
+        //for (int i = 0; i < strs.size(); i++) {
+        //    String str = strs.get(i);
+        //    System.out.println(str);
+        //    strs.remove("a");
+        //}
+
+        // 抛ConcurrentModificationException异常，因此remove会改变modCount值，
+        // 但是iterator()方法返回的ArrayList.Itr迭代器对象(iterator)中的expectedModCount没有改变
+        // 导致不一致，在next()方法中的checkForComodification()方法会做相关检查，从而抛出异常
+        Iterator<String> iterator = strs.iterator();
+        //strs.remove("a");
+        while (iterator.hasNext()) {
+            String next = iterator.next();
+            // 不会抛出异常，因此迭代器的remove方法会修改 expectedModCount=modCount
+            if ("a".equals(next)) {
+                iterator.remove();
+            }
+        }
+
+        // 会抛异常，foreach是通过迭代器迭代的
+        for (String str : strs) {
+            strs.remove("a");
+        }
+    }
+
+    @Test
+    public void jdkVectorGrammar() throws Exception {
+        Vector<String> vectors = new Vector();
+        vectors.add("a");
+        vectors.add("b");
+        vectors.add("c");
+        // 会抛异常，foreach是通过迭代器迭代的; 原因和ArrayList一样
+        //for (String str : vectors) {
+        //    vectors.remove("a");
+        //}
+
+        CountDownLatch runLatch = new CountDownLatch(1);
+        CountDownLatch forLatch = new CountDownLatch(1);
+        new Thread(() -> {
+            try {
+                runLatch.await();
+                vectors.add("d");
+                forLatch.countDown();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+        // 会抛ConcurrentModificationException异常，因为上面的线程增加了元素，修改modCount的值
+        for (String str : vectors) {
+            runLatch.countDown();
+            forLatch.await();
+            System.out.println(str);
+        }
+        /* 一般有2种解决办法：
+        　　1）在使用iterator迭代的时候使用synchronized或者Lock进行同步；
+        　　2）使用并发容器CopyOnWriteArrayList代替ArrayList和Vector。
+        */
+    }
+
+    @Test
+    public void jdkArrayDequeGrammar() {
+        /*
+        Java里有一个叫做Stack的类，却没有叫做Queue的类（它是个接口名字）。当需要使用栈时，Java已不推荐使用Stack，
+        而是推荐使用更高效的ArrayDeque；既然Queue只是一个接口，当需要使用队列时也就首选ArrayDeque了（次选是LinkedList）。
+        官方更推荐使用ArrayDeque用作栈和队列
+
+        从名字可以看出ArrayDeque底层通过数组实现，为了满足可以同时在数组两端插入或删除元素的需求，
+        该数组还必须是循环的，即循环数组（circular array），也就是说数组的任何一点都可能被看作起点或者终点。
+        ArrayDeque是非线程安全的（not thread-safe），当多个线程同时使用的时候，需要程序员手动同步；
+        另外，该容器不允许放入null元素。
+         */
+        Deque<String> deque = new ArrayDeque<>();
+        deque.addFirst("a");
     }
 
     /*
@@ -508,4 +829,16 @@ public class BaseGrammar {
             对于非常容易产生死锁的业务部分，可以尝试使用升级锁定颗粒度，通过表级锁定来减少死锁产生的概率。
      */
 
+}
+
+/*
+一个Java源文件中可以定义多个类，但是最多只有一个类被public修饰，并且这个类的类名与文件名必须相同。
+若这个文件中没有public的类，则文件名可随便命名(前提是符合规范)。
+要注意的是，当用javac指令编译有多个类的Java源文件时，它会给该源文件中的每一个类生成一个对应的.class 文件。
+ */
+class OtherClassInSameFile {
+
+    public static void main(String[] args) {
+        System.out.println("同一个文件中的另一个类");
+    }
 }

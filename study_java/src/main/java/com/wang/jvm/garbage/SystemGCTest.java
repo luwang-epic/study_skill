@@ -19,6 +19,8 @@ public class SystemGCTest {
         new SystemGCTest();
         // 提醒 JVM 进行垃圾回收，但是不确定是否立马执行gc，内部调用Runtime.getRuntime().gc();来实现
         System.gc();
+        // 如果想要执行gc，可以先调用System.runFinalization()的方法，然后再调用gc
+        // jvm gc方法的内部有一个bool变量，当运行过runFinalization方法后才会为true，此时才会执行gc
 
         // 强制调用失去引用对象的finalize()方法
         //System.runFinalization();

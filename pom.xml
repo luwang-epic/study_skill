@@ -18,6 +18,8 @@
         <module>study_hbase</module>
         <module>study_spring_security</module>
         <module>study_janusgraph</module>
+        <module>study_kafka</module>
+        <module>study_spring</module>
     </modules>
 
     <properties>

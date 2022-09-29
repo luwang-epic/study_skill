@@ -1,0 +1,18 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <aop:aspectj-autoproxy />
+
+    <bean id="c" class="com.wang.spring.ioc.CircularDependencySample$CircularDependencyC" >
+        <constructor-arg name="d" ref="d" />
+    </bean>
+
+    <bean id="d" class="com.wang.spring.ioc.CircularDependencySample$CircularDependencyD" >
+        <property name="c" ref="c" />
+    </bean>
+</beans>
