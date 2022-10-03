@@ -16,7 +16,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * 注意： 在同一线程中，持有读锁后，不能直接调用写锁的lock方法 ，否则会造成死锁。
  *
  */
-public class ReadWriteLockDemo {
+public class ReentrantReadWriteLockDemo {
 	
 	
 	static class MyCount {

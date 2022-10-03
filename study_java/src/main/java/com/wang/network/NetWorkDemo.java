@@ -57,4 +57,7 @@ XSS攻击的全称是跨站脚本攻击，是Web应用程序中最常见到的�
 
  */
 public class NetWorkDemo {
+    public static void main(String[] args) {
+
+    }
 }

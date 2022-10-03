@@ -58,13 +58,13 @@ __consumer_offsets 主题里面采用 key 和 value 的方式存储数据。key�
         例如： groupid的hashcode值 = 1，1% 50 = 1，那么__consumer_offsets主题的1号分区，
             在哪个broker上，就选择这个节点的coordinator作为这个消费者组的老大。
             消费者组下的所有的消费者提交offset的时候就往这个分区去提交offset
-    2. 选出一个consumer作为leader，把要消费的topic情况发送给leader 消费者
+    2. 在消费者协调器中选出一个consumer作为leader，并把要消费的topic情况发送给leader消费者
     3. leader会根据分区分配策略制定消费方案，把消费方案发给coordinator
     4. Coordinator就把消费方案下发给各个consumer
     5. consumer根据消费方案选择自己的消费分区
     6. 每个消费者都会和coordinator保持心跳（默认3s），一旦超时（session.timeout.ms=45s），该消费者会被移除，
         并触发再平衡；或者消费者处理消息的时间过长（max.poll.interval.ms5分钟），也会触发再平衡
-    7. 某个消费者发送消费请求（sendFetches），从kafka集群拉取数据，拉取方案有如下几种：
+    7. 某个消费者发送消费请求（sendFetches），从kafka集群拉取数据（每个消费者拉取自己消费的分区数据），拉取方案有如下几种：
             1) Fetch.min.bytes每批次最小抓取大小，默认1字节 (超过这个大小才会拉取数据)
             2) fetch.max.wait.ms一批数据最小值未达到的超时时间，默认500ms （或者超过这个时间没有拉取，才会拉取数据）
             3) Fetch.max.bytes每批次最大抓取大小，默认50m （每次最大拉取多少数据）
@@ -93,6 +93,11 @@ __consumer_offsets 主题里面采用 key 和 value 的方式存储数据。key�
     2）如果是下游的数据处理不及时：提高每批次拉取的数量。批次拉取数据过少（拉取数据/处理时间 < 生产速度），
         使处理的数据小于生产的数据，也会造成数据积压。
 
+kafka的生产者客户端Producer是线程安全的，但是消费者客户端是非线程安全的，acquire
+每次操作时都会调用acquire方法用来确定当前只有一个线程操作，如果有多个线程在操作，会抛出ConcurrentModifyException异常。
+为了能够多线程更快速的读取消息，可以参考如下两种方式：
+    1. 在同一个消费者组下，每个线程建立一个consumer消费者组，这样相当于是在一个消费者组中多个消费者同时读取
+    2. 另外一种处理就是，用一个线程去拉取消息，但是拉取后的消息交由线程池处理。一般poll都比较快，比较慢的是消息的业务逻辑处理
 
  */
 
@@ -153,7 +158,7 @@ public class ConsumerSample {
 
         // 拉取数据打印
         while (true) {
-            // 设置 1s 中消费一批数据
+            // 设置最大的阻塞时间
             ConsumerRecords<String, String> consumerRecords = kafkaConsumer.poll(Duration.ofSeconds(2));
             // 打印消费到的数据
             for (ConsumerRecord<String, String> consumerRecord : consumerRecords) {

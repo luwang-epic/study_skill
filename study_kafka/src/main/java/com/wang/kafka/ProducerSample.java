@@ -59,6 +59,8 @@ Kafka生产者发送数据的条件：
     linger.ms：如果数据迟迟未达到batch.size，sender等
         待linger.ms设置的时间到了之后就会发送数据。单位ms，默认值是0ms，表示没有延迟。
 
+kafka生产者时线程安全的，因此多个线程可以公用一个KafkaProducer实例
+
 生产者如何提高吞吐量：
     batch.size：批次大小，默认16k
     linger.ms：等待时间，修改为5-100ms

@@ -26,6 +26,45 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/*
+Hbase shell相关命令：
+    创建命名空间: create_namespace 'bigdata'
+
+    查看所有的命名空间: list_namespace
+
+    创建表: 有如下两种方式：
+        create 'student1','info' （默认放到default空间中）
+        create 'bigdata:student', {NAME => 'info', VERSIONS =>5}, {NAME => 'msg'} （放到bigdata空间）
+
+    查看所有的表名：list
+
+    查看一个表的详情: describe 'student1'
+
+    修改表：主要分为如下两种情况：
+        增加列族和修改信息都使用覆盖的方法: alter 'student1', {NAME => 'f1', VERSIONS => 3}
+        删除信息使用特殊的语法，例如下面两种方式：
+            alter 'student1', NAME => 'f1', METHOD => 'delete'
+            alter 'student1', 'delete' => 'f1'
+
+    删除表: 需要先将表格状态设置为不可用，然后再删除，实现下面两个指令：
+        disable 'student1'
+        drop 'student1'
+
+    写入数据：put 'bigdata:student','1001','info:name','lisi'
+
+    读取数据：
+        get 'bigdata:student','1001'
+        get 'bigdata:student','1001' , {COLUMN => 'info:name'}
+
+    扫描数据：scan 'bigdata:student',{STARTROW => '1001',STOPROW =>'1002'}
+
+    删除数据：执行命令会标记数据为要删除，不会直接将数据彻底删除，删除数据只在特定时期清理磁盘时进行
+        删除一个版本：delete 'bigdata:student','1001','info:name'
+        删除所有版本： deleteall 'bigdata:student','1001','info:name'
+
+
+ */
+
 public class HbaseDdlAndDmlSample {
     public Connection connection;
 
@@ -234,4 +273,5 @@ public class HbaseDdlAndDmlSample {
 
         table.close();
     }
+
 }
