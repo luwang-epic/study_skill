@@ -3,6 +3,16 @@ package com.wang.algorithm;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+/*
+           时间复杂度       空间复杂度       稳定性
+选择排序      O(N^2)          O(1)          否
+冒泡排序      O(N^2)          O(1)          是
+插入排序      O(N^2)          O(1)          是
+归并排序      O(N*logN)       O(N)          是
+快速排序      O(N*logN)       O(logN)       否
+堆排序       O(N*logN)       O(1)          否
+ */
+
 /**    一些常见的排序算法
  *   主要包括 如下几类  ：
  *     1. 插入排序  ：    直接插入排序

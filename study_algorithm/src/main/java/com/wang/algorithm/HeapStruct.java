@@ -39,7 +39,7 @@ public class HeapStruct {
     }
 
     public void heapify(int n) {
-        for (int i=nums.length / 2; i >= 0; i--) {
+        for (int i = nums.length / 2; i >= 0; i--) {
             percolateDown(n, i);
         }
     }

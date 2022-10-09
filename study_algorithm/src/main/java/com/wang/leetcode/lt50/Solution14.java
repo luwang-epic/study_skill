@@ -1,4 +1,4 @@
-package com.wang.leetcode.lt500;
+package com.wang.leetcode.lt50;
 
 /*
 编写一个函数来查找字符串数组中的最长公共前缀。

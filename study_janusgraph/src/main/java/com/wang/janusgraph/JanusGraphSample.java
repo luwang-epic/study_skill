@@ -252,6 +252,8 @@ JanusGraph如果启动过程中出现图实例已经存在的异常，可以通�
  graph.graph.replace-instance-if-exists="true"
 
 
+一些配合项可以参考官网这个页面：https://docs.janusgraph.org/configs/janusgraph-cfg/#query
+
  */
 public class JanusGraphSample {
 

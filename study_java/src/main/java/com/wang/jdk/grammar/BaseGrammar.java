@@ -75,7 +75,7 @@ public class BaseGrammar {
     }
 
     /*
-    Java创建对象的4中方式：
+    Java创建对象的4中方式（对象分配参考：https://www.cnblogs.com/jianwei-dai/p/15402683.html）：
         new对象
         通过反射创建对象
         通过clone方法创建对象

@@ -1,4 +1,4 @@
-package com.wang.leetcode.lt500;
+package com.wang.leetcode.lt50;
 
 /*
 给你一个字符串 s，找到 s 中最长的回文子串。

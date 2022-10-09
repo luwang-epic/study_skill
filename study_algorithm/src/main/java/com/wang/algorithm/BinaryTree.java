@@ -1,31 +1,491 @@
 package com.wang.algorithm;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Stack;
 
+/**
+ * ¶ş²æÊ÷µÄ±éÀú
+ */
 public class BinaryTree<T> {
+
+    public static void main(String[] args) {
+        /* ´´½¨ÈçÏÂµÄÊ÷
+         * 				A
+         * 		B				C
+         * 	D		E		F
+         *
+         */
+        Node<String> root = new Node<>("A");
+        BinaryTree<String> tree = new BinaryTree<>(root);
+        Node<String> temp = tree.insertLChild(root, new Node<>("B"));
+        tree.insertLChild(temp, new Node<>("D"));
+        tree.insertRChild(temp, new Node<>("E"));
+        temp = tree.insertRChild(root, new Node<>("C"));
+        tree.insertLChild(temp, new Node<>("F"));
+
+        System.out.println("********ÏÈĞ´±éÀúµÄµİ¹éÊµÏÖ**************");
+        BinaryTree.preOrderTraverse(root);
+        System.out.println("\n********ÏÈĞò±éÀúµÄ¶ÑÕ»ÊµÏÖ**************");
+        BinaryTree.preOrderTraverseByStack(root);
+        System.out.println("\n********morrisÏÈĞò±éÀú¶ş²æÊ÷**************");
+        morris(root, true, false, false);
+
+        System.out.println("\n********ÖĞĞò±éÀúµÄµİ¹éÊµÏÖ**************");
+        BinaryTree.inOrderTraverse(root);
+        System.out.println("\n********ÖĞĞò±éÀúµÄ¶ÑÕ»ÊµÏÖ**************");
+        BinaryTree.inOrderTraverseByStack(root);
+        System.out.println("\n********morrisÖĞĞò±éÀú¶ş²æÊ÷**************");
+        morris(root, false, true, false);
+
+        System.out.println("\n********ºóĞò±éÀúµÄµİ¹éÊµÏÖ**************");
+        BinaryTree.postOrderTraverse(root);
+        System.out.println("\n********ºóĞò±éÀúµÄ¶ÑÕ»ÊµÏÖ**************");
+        BinaryTree.postOrderTraverseByStack2(root);
+        System.out.println("\n********morrisºóĞò±éÀú¶ş²æÊ÷**************");
+        morris(root, false, false, true);
+
+        System.out.println("\n********¿í¶ÈÓÅÏÈ±éÀú£¬²¢Í³¼Æ²ãÖĞ×î´ó½ÚµãÊı**************");
+        widthFirstTraverseWithStatLayerNum(root);
+
+        System.out.println("\n********ÊÇ·ñÊÇÆ½ºâ¶ş²æÊ÷**************");
+        System.out.println(isBalancedBinaryTree(root));
+
+        System.out.println("\n********Á½¸ö½ÚµãµÄ×îµÍ¹«¹²×æÏÈ**************");
+        System.out.println(lowestCommonAncestor(root, root, temp));
+    }
+
+    /**
+     * ÏÈĞò±éÀúµÄµİ¹éÊµÏÖ
+     * 1.ÏÈ±éÀú¸ù½Úµã
+     * 2.ÔÙ±éÀú×ó×ÓÊ÷
+     * 3.×îºó±éÀúÓÒ×ÓÊ÷
+     * ½ÚµãµÄ×óÓÒ×ÓÊ÷Ò²Òª°´ÕÕÕâ¸ö²½Öè±éÀú
+     */
+    public static void preOrderTraverse(Node root) {
+        if (null == root) {
+            return;
+        }
+
+        //ÏÈ·ÃÎÊ¸ù½Úµã
+        visitNode(root);
+
+        //ÔÙ·ÃÎÊ×ó×ÓÊ÷
+        if (root.lchild != null) {
+            preOrderTraverse(root.lchild);
+        }
+
+        //×îºó·ÃÎÊÓÒ×ÓÊ÷
+        if (root.rchild != null) {
+            preOrderTraverse(root.rchild);
+        }
+    }
+
+
+    /**
+     * ÏÈĞò±éÀúµÄ¶ÑÕ»ÊµÏÖÊµÏÖ
+     */
+    public static void preOrderTraverseByStack(Node root) {
+        if (null == root) {
+            return;
+        }
+
+        Stack<Node> stack = new Stack<>();
+        stack.push(root);
+        Node node;
+        while (!stack.isEmpty()) {
+            //ÏÈ·ÃÎÊ¸ù
+            node = stack.pop();
+            visitNode(node);
+            // Ê×ÏÈ£¬ÓÒ×ÓÊ÷²»Îª¿Õ£¬ÈëÕ»
+            if (null != node.rchild) {
+                stack.push(node.rchild);
+            }
+            // È»ºó£¬×ó×ÓÊ÷²»Îª¿Õ£¬ÈëÕ»
+            if (null != node.lchild) {
+                stack.push(node.lchild);
+            }
+        }
+    }
+
+
+    /**
+     * ÖĞĞò±éÀúµÄµİ¹éÊµÏÖ
+     * 1.ÏÈ±éÀú×ó×ÓÊ÷
+     * 2.ÔÙ±éÀú¸ù½Úµã
+     * 3.×îºó±éÀúÓÒ×ÓÊ÷
+     * ½ÚµãµÄ×óÓÒ×ÓÊ÷Ò²Òª°´ÕÕÕâ¸ö²½Öè±éÀú
+     */
+    public static void inOrderTraverse(Node root) {
+        if (null == root) {
+            return;
+        }
+
+        //ÏÈ·ÃÎÊ×ó×ÓÊ÷
+        if (root.lchild != null) {
+            inOrderTraverse(root.lchild);
+        }
+
+        // ÔÙ·ÃÎÊ¸ù½Úµã
+        visitNode(root);
+
+        // ×îºó·ÃÎÊÓÒ×ÓÊ÷
+        if (root.rchild != null) {
+            inOrderTraverse(root.rchild);
+        }
+    }
+
+    /**
+     * ÖĞĞò±éÀúµÄ¶ÑÕ»ÊµÏÖÊµÏÖ
+     */
+    public static void inOrderTraverseByStack(Node root) {
+        if (null == root) {
+            return;
+        }
+
+        Stack<Node> stack = new Stack<>();
+        Node node = root;
+        while (!stack.isEmpty() || null != node) {
+            // ×ó×ÓÊ÷²»Îª¿Õ£¬ÈëÕ»
+            if (node != null) {
+                stack.push(node);
+                node = node.lchild;
+            } else {
+                node = stack.pop();
+                // ·ÃÎÊ×ó×ÓÊ÷
+                visitNode(node);
+                node = node.rchild;
+            }
+        }
+    }
+
+
+    /**
+     * ºóĞò±éÀúµÄµü´úÊµÏÖ
+     * 1.ÏÈ±éÀú×ó×ÓÊ÷
+     * 2.ÔÙ±éÀúÓÒ×ÓÊ÷
+     * 3.×îºó±éÀú¸ù½Úµã
+     * ½ÚµãµÄ×óÓÒ×ÓÊ÷Ò²Òª°´ÕÕÕâ¸ö²½Öè±éÀú
+     */
+    private static void postOrderTraverse(Node root) {
+        if (null == root) {
+            return;
+        }
+
+        // ÏÈ·ÃÎÊ×ó×ÓÊ÷
+        if (root.lchild != null) {
+            postOrderTraverse(root.lchild);
+        }
+
+        // ÔÙ·ÃÎÊÓÒ×ÓÊ÷
+        if (root.rchild != null) {
+            postOrderTraverse(root.rchild);
+        }
+
+        // ×îºó·ÃÎÊ¸ù½Úµã
+        visitNode(root);
+    }
+
+
+    /**
+     * ºóĞò±éÀúµÄ¶ÑÕ»ÊµÏÖÊµÏÖ
+     */
+    public static void postOrderTraverseByStack(Node root) {
+        if (null == root) {
+            return;
+        }
+
+        Stack<Node> stack = new Stack<>();
+        stack.push(root);
+
+        Node node = stack.pop();
+        Node prev = node;
+        while (node != null || !stack.isEmpty()) {
+            //ÏÈ·ÃÎÊ×ó×ÓÊ÷
+            while (node != null) {
+                stack.push(node);
+                node = node.lchild;
+            }
+
+            //ÔÙ·ÃÎÊÓÒ×ÓÊ÷
+            if (!stack.isEmpty()) {
+                node = stack.peek().rchild;
+
+                if (node == null || node == prev) {
+                    node = stack.pop();
+                    //·ÃÎÊ¸ù½Úµã
+                    visitNode(node);
+                    prev = node;
+                    node = null;
+                }
+            }
+        }
+    }
+
+    /**
+     * ºóĞò±éÀúµÄ¶ÑÕ»ÊµÏÖÊµÏÖ
+     *    ÀûÓÃÏÈĞò±éÀúµÄÊµÏÖ£º¸ù×óÓÒ  -> ¸ùÓÒ×ó
+     *    ÄÇÃ´£¬Èç¹û²»´òÓ¡£¬¶øÊÇ·Åµ½ÁíÒ»¸öÕ»ÖĞ£¬ÄÇÃ´±ä³ÉÁË£º×óÓÒ¸ù£¬¾ÍÊÇºóĞø±éÀúÁË
+     */
+    public static void postOrderTraverseByStack2(Node root) {
+        if (null == root) {
+            return;
+        }
+
+        Stack<Node> stack1 = new Stack<>();
+        Stack<Node> stack2 = new Stack<>();
+        stack1.push(root);
+        Node node;
+        while (!stack1.isEmpty()) {
+            //ÏÈ·ÃÎÊ¸ù
+            node = stack1.pop();
+            stack2.push(node);
+            // Ê×ÏÈ£¬×ó×ÓÊ÷²»Îª¿Õ£¬ÈëÕ»
+            if (null != node.lchild) {
+                stack1.push(node.lchild);
+            }
+            // È»ºó£¬ÓÒ×ÓÊ÷²»Îª¿Õ£¬ÈëÕ»
+            if (null != node.rchild) {
+                stack1.push(node.rchild);
+            }
+        }
+        // ×îºóÊä³ö
+        while (!stack2.isEmpty()) {
+            visitNode(stack2.pop());
+        }
+    }
+
+    /**
+     * morris±éÀú£¬¸Ã±éÀú·½·¨¿ÉÒÔ²»Ê¹ÓÃ¶îÍâµÄ¿Õ¼ä£¬ÔÚO(N)¸´ÔÓ¶ÈÍê³É±éÀú
+     * ÀûÓÃ¶ş²æÊ÷µÄÒ¶×Ó½Úµã¿ÕÖ¸ÕëÍê³É±éÀú£¬¿ÉÒÔ¸ÄÎªÏÈĞò±éÀú£¬ÖĞĞò±éÀú£¬ºÍºóĞò±éÀú
+     * ²½Öè£º
+     *  1. Èç¹ûÓĞ×óº¢×Ó£¬½«×óº¢×ÓµÄ×îºóÓÒÖ¸ÕëÖ¸Ïòµ±Ç°½Úµã£¬È»ºó±éÀú×ó×ÓÊ÷
+     *  2. Èç¹ûÃ»ÓĞ×óº¢×Ó»òÕß×óº¢×ÓµÄÓĞÖ¸ÕëÖ¸ÏòÁË×Ô¼º£¬½«µ±Ç°Ö¸ÕëÖ¸ÏòÓÒº¢×Ó
+     * ÉÏÃæµÄ²½Öè»á½«½Úµã·ÖÎªÁ½ÖÖ£¬Ö»±éÀúÒ»´ÎµÄ£¬ºÍ À´µ½Á½´ÎµÄ½Úµã
+     *
+     * ¸ÄÎªÏÈĞò±éÀú£ºÖ»±éÀúÒ»´ÎµÄ½Úµã´òÓ¡£¬±éÀúÁ½´ÎµÄ½Úµã£¬´òÓ¡µÚÒ»´ÎµÄ£¬µÚ¶ş´Î²»¹Ü
+     * ¸ÄÎªÖĞĞò±éÀú£ºÖ»±éÀúÒ»´ÎµÄ½Úµã´òÓ¡£¬±éÀúÁ½´ÎµÄ½Úµã£¬µÚÒ»´Î²»¹Ü£¬´òÓ¡µÚ¶ş´ÎµÄ
+     * ¸ÄÎªºóĞø±éÀú£ºÖ»±éÀúÒ»´ÎµÄ½Úµã²»¹Ü£¬±éÀúÁ½´ÎµÄ½Úµã,µÚÒ»´Î²»¹Ü£¬
+     *      ´òÓ¡µÚ¶ş´ÎµÄÄæĞò´òÓ¡×óº¢×ÓµÄÓÒ±ß½ç£¬±éÀúÍê³Éºó£¬µ¥¶À´òÓ¡Õû¸öÊ÷µÄÓÒ±ß½ç
+     *      ÓĞ¸öÎÊÌâÊÇÈçºÎ²»ÊÊÓÃ¿Õ¼ä£¬ÄæĞò´òÓ¡ÓÒ±ß½ç£¬Ê¹ÓÃÄæĞòÁ´±íµÄ·½Ê½
+     *
+     * @param preOrder ÊÇ·ñÏÈĞò±éÀú
+     * @param inOrder ÊÇ·ñÖĞĞò±éÀú
+     * @param postOrder ÊÇ·ñºóĞò±éÀú
+     */
+    public static void morris(Node root, boolean preOrder, boolean inOrder, boolean postOrder) {
+        if (null == root) {
+            return;
+        }
+
+        Node cur = root;
+        Node mostRight = null;
+        // ¿ªÊ¼±éÀú
+        while (null != cur) {
+            // mostRightÊÇcurµÄ×óº¢×Ó
+            mostRight = cur.lchild;
+            // ×óº¢×Ó²»Îª¿Õ£¬
+            if (null != mostRight) {
+                // ÕÒµ½×îÓÒµÄÖ¸Õë
+                while (null != mostRight.rchild && cur != mostRight.rchild) {
+                    mostRight = mostRight.rchild;
+                }
+                // mostRightÈç¹ûÎª¿Õ£¬ÄÇÃ´ÊÇcur×ó×ÓÊ÷ÉÏ£¬×îÓÒµÄ½Úµã
+                if (null == mostRight.rchild) {
+                    // ÏÈĞò±éÀú£¬µÚÒ»´Î½øÈëµÄÊ±ºò·ÃÎÊ½Úµã
+                    if (preOrder) {
+                        visitNode(cur);
+                    }
+
+                    mostRight.rchild = cur;
+                    // ¼ÌĞø±éÀú×ó×ÓÊ÷
+                    cur = cur.lchild;
+                    continue;
+                }
+                // ·ñÔòmostRight == cur£¬ËµÃ÷Ö®Ç°ÒÑ¾­¸Ä¹ıÁË£¬ÕâÊÇµÚ¶ş´Îµ½´ïcur½ÚµãÁË
+                else {
+                    // µÚ¶ş´Î´ïµ½£¬ËµÃ÷×ó×ÓÊ÷µ½±éÀúÍê³ÉÁË£¬Ìø³öÑ­»·£¬¿ªÊ¼±éÀúÓÒ×ÓÊ÷
+                    mostRight.rchild = null;
+
+                    // ÖĞĞò±éÀú£¬µÚ¶ş´Î½øÈëµÄÊ±ºò·ÃÎÊ½Úµã
+                    if (inOrder) {
+                        visitNode(cur);
+                    }
+
+                    // ºóĞø±éÀú£¬µÚ¶ş´Î½øÈëµÄÊ±ºòÄæĞò·ÃÎÊ×óº¢×ÓµÄËùÓĞÓÒ½Úµã
+                    if (postOrder) {
+                        inversePrintRight(cur.lchild);
+                    }
+                }
+            } else {
+                if (preOrder || inOrder) {
+                    visitNode(cur);
+                }
+            }
+
+            // ±éÀúÓÒ×ÓÊ÷
+            cur = cur.rchild;
+        }
+
+        // ºóĞø±éÀúÖĞ£¬Ê÷±éÀúÍê³É£¬´òÓ¡Õû¸öÊ÷µÄËùÓĞÓÒº¢×Ó
+        if (postOrder) {
+            inversePrintRight(root);
+        }
+    }
+
+    private static void inversePrintRight(Node node) {
+        // ·´×ª´òÓ¡
+        Node tail = reverseLink(node);
+        Node cur = tail;
+        while (null != cur) {
+            visitNode(cur);
+            cur = cur.rchild;
+        }
+        // ·´×ª»ØÈ¥£¬±£³Ö²»±ä
+        reverseLink(tail);
+    }
+
+    /**
+     * ·´×ªnodeµÄÁ´±í£¨nextÓÒrchild±íÊ¾£©
+     * @param node Í·½áµã
+     * @return ĞÂÁ´±íµÄÍ·½áµã
+     */
+    public static Node reverseLink(Node node) {
+        Node pre = null;
+        Node next = null;
+        while (null != node) {
+            next = node.rchild;
+            node.rchild = pre;
+            pre = node;
+            node = next;
+        }
+        return pre;
+    }
+
+    /**
+     * ¿í¶ÈÓÅÏÈ±éÀú£¬²¢Í³¼ÆÃ¿²ãµÄ½ÚµãÊı
+     */
+    public static void widthFirstTraverseWithStatLayerNum(Node root) {
+        if (null == root) {
+            return;
+        }
+
+        Queue<Node> queue = new LinkedList<>();
+        queue.add(root);
+        HashMap<Node, Integer> nodeLayerMap = new HashMap<>();
+        nodeLayerMap.put(root, 1);
+        int curLayer = 1;
+        // µ±Ç°²ãµÄ½ÚµãÊı
+        int curLayerCount = 0;
+        // Ã¿²ãµÄ×î´ó½ÚµãÊı
+        int max = 1;
+
+        Node cur;
+        int curNodeLayer;
+        while (!queue.isEmpty()) {
+            cur = queue.poll();
+            // ·ÃÎÊµ±Ç°½Úµã
+            visitNode(cur);
+
+            curNodeLayer = nodeLayerMap.get(cur);
+            // ÏàµÈ£¬ËµÃ÷»¹ÔÚÒ»²ã£¬·ñÔò½øÈëÁËÏÂÒ»²ã´òÓ¡
+            if (curNodeLayer == curLayer) {
+                curLayerCount++;
+            } else {
+                max = Math.max(max, curLayerCount);
+                curLayer++;
+                curLayerCount = 1;
+            }
+
+            // ×óº¢×ÓÈë¶Ó£¬º¢×Ó²ãÊıÊÇ¸¸²ãÊı+1
+            if (null != cur.lchild) {
+                nodeLayerMap.put(cur.lchild, curNodeLayer + 1);
+                queue.add(cur.lchild);
+            }
+            // ÓÒº¢×ÓÈë¶Ó£¬º¢×Ó²ãÊıÊÇ¸¸²ãÊı+1
+            if (null != cur.rchild) {
+                nodeLayerMap.put(cur.rchild, curNodeLayer + 1);
+                queue.add(cur.rchild);
+            }
+        }
+        // ¶Ô±È×îºóÒ»²ã
+        max = Math.max(max, curLayerCount);
+
+        System.out.println("×î´ó½ÚµãµÄ¸öÊı£º" + max);
+    }
+
+    /**
+     * ÊÇ·ñÊÇÆ½ºâ¶ş²æÊ÷
+     */
+    public static boolean isBalancedBinaryTree(Node head) {
+        return isBalanced(head).isBalanced;
+    }
+
+    private static class BalancedInfo {
+        public boolean isBalanced;
+        // ÊıµÄ¸ß¶È
+        private int height;
+        public BalancedInfo(boolean isBalanced, int height) {
+            this.isBalanced = isBalanced;
+            this.height = height;
+        }
+    }
+    private static BalancedInfo isBalanced(Node head) {
+        // ¿ÕÊıÊ±Æ½ºâ¶ş²æÊ÷£¬ÇÒ¸ß¶ÈÎª0
+        if (null == head) {
+            return new BalancedInfo(true, 0);
+        }
+
+        // ¼ÆËã×óÓÒ×ÓÊ÷ÊÇ·ñÊÇÆ½ºâ¶ş²æÊ÷
+        BalancedInfo left = isBalanced(head.lchild);
+        BalancedInfo right = isBalanced(head.rchild);
+
+        // ¸ß¶ÈÎª×óÓÒ×ÓÊ÷ÖĞ¸ß¶È´óµÄ¼Ó1
+        int height = Math.max(left.height, right.height) + 1;
+        // ×óÓÒ×ÓÊ÷¶¼ÊÇÆ½ºâ¶ş²æÊ÷£¬ÇÒ¸ß¶ÈÖ»²îĞ¡ÓÚµÈÓÚ1
+        boolean isBalanced = left.isBalanced && right.isBalanced
+                && Math.abs(left.height - right.height) <= 1;
+        return new BalancedInfo(isBalanced, height);
+    }
+
+    /**
+     * ·µ»Ø¶ş²æÊ÷ÖĞÁ½¸ö½ÚµãµÄ×îµÍµÄ¹«¹²×æÏÈ
+     *  ÒòÎªÁ½¸ö½ÚµãÔÚ¶ş²æÊ÷ÖĞ£¬ËùÒÔ¿Ï¶¨ÓĞ¹«¹²×æÏÈ£¬Òò´ËheadÊÇ¹«¹²µÄ£¬ËùÒÔ¿Ï¶¨ÓĞ×îµÍµÄÒ»¸ö¹«¹²×æÏÈ
+     *      1. µÚÒ»ÖĞÇé¿ö£¬Ò»¸ö½ÚµãÊÇÁíÒ»¸ö½ÚµãµÄ×æÏÈ
+     *      2. µÚ¶şÖÖÇé¿ö£¬Á½¸ö½Úµã¶¼²»ÊÇ»¥ÏàµÄ¹«¹²×æÏÈ
+     * @param head ¶ş²æÊ÷¸ù
+     * @param node1 ¶ş²æÊ÷ÖĞµÄÒ»¸ö½Úµã
+     * @param node2 ¶ş²æÊ÷ÖĞµÄÁíÒ»¸ö½Úµã
+     * @return ×îµÍ¹«¹²×æÏÈ
+     */
+    public static Node lowestCommonAncestor(Node head, Node node1, Node node2) {
+        // Èç¹ûÁ½¸ö½ÚµãÖĞµÄÒ»¸öÊÇ¸ù½Úµã£¬ÄÇÃ´¸ù½ÚµãÎª×æÏÈ½Úµã
+        if (null == head || head == node1 || head == node2) {
+            return head;
+        }
+
+        // Ïò×óÓÒ×ÓÊ÷Òª×îµÍµÄ¹«¹²½Úµã
+        Node left = lowestCommonAncestor(head.lchild, node1, node2);
+        Node right = lowestCommonAncestor(head.rchild, node1, node2);
+
+        // ×óÓÒÁ½¸ö×ÓÊ÷¶¼²»ÊÇnull£¬ÄÇÃ´·µ»Ø×Ô¼º£¬Õâ¸ö¾ÍÊÇÁ½¸öµÄ¹«¹²×æÏÈ
+        if (null != left && null != right) {
+            return head;
+        }
+
+        // ×óÓÒÁ½¿ÅÊı£¬ÓĞÒ»¸öÊÇnull£¬ÁíÒ»¸ö²»È·¶¨£¬·µ»Ø²»È·¶¨µÄ
+        return null != left ? left : right;
+    }
+
+    private static void visitNode(Node<?> node) {
+        System.out.print(node + "  ");
+    }
+
 
     final private Node<T> root;
 
-    public static class Node<T> {
-        protected Node<T> lchild;
-        protected T data;
-        // protected Node parent;
-        protected Node<T> rchild;
-
-        public Node(T t) {
-            lchild = null;
-            rchild = null;
-            this.data = t;
-        }
-
-        @Override
-        public String toString() {
-            return data.toString();
-        }
-
-    }
-
-    public Node<T> getRoot(){
+    public Node<T> getRoot() {
         return this.root;
     }
 
@@ -43,208 +503,21 @@ public class BinaryTree<T> {
         return node;
     }
 
+    private static class Node<T> {
+        protected Node<T> lchild;
+        protected T data;
+        // protected Node parent;
+        protected Node<T> rchild;
 
-    private static void visitNode(Node<?> node){
-        System.out.print(node + "  ");
-    }
-
-    /**
-     *  å…ˆåºéå†çš„è¿­ä»£å®ç°
-     *  1.å…ˆéå†æ ¹èŠ‚ç‚¹
-     *  2.å†éå†å·¦å­æ ‘
-     *  3.æœ€åéå†å³å­æ ‘
-     *
-     *	èŠ‚ç‚¹çš„å·¦å³å­æ ‘ä¹Ÿè¦æŒ‰ç…§è¿™ä¸ªæ­¥éª¤éå†
-     */
-    public static void preOrderTraverse(Node<?> root) {
-        //å…ˆè®¿é—®æ ¹èŠ‚ç‚¹
-        visitNode(root);
-
-        //å†è®¿é—®å·¦å­æ ‘
-        if(root.lchild != null) {
-            preOrderTraverse(root.lchild);
+        public Node(T t) {
+            lchild = null;
+            rchild = null;
+            this.data = t;
         }
 
-        //æœ€åè®¿é—®å³å­æ ‘
-        if(root.rchild != null) {
-            preOrderTraverse(root.rchild);
+        @Override
+        public String toString() {
+            return data.toString();
         }
-    }
-
-
-    /**
-     *  å…ˆåºéå†çš„å †æ ˆå®ç°å®ç°
-     */
-    public static void preOrderTraverseByStack(Node<?> root) {
-        Stack<Node<?>> stack = new Stack<Node<?>>();
-        stack.push(root);
-
-        while(!stack.isEmpty()){
-            Node<?> node = stack.peek();
-            while(node != null){
-                //å…ˆè®¿é—®æ ¹èŠ‚ç‚¹
-                visitNode(node);
-
-                //å†è®¿é—®å·¦å­æ ‘
-                node = node.lchild;
-                stack.push(node);
-            }
-
-            //ç©ºæŒ‡é’ˆå‡ºæ ˆ
-            stack.pop();
-
-            //åœ¨è®¿é—®å³å­æ ‘
-            if(!stack.isEmpty()){
-                node = stack.pop();
-                stack.push(node.rchild);
-            }
-        }
-    }
-
-
-
-    /**
-     *  ä¸­åºéå†çš„è¿­ä»£å®ç°
-     *  1.å…ˆéå†å·¦å­æ ‘
-     *  2.å†éå†æ ¹èŠ‚ç‚¹
-     *  3.æœ€åéå†å³å­æ ‘
-     *
-     *	èŠ‚ç‚¹çš„å·¦å³å­æ ‘ä¹Ÿè¦æŒ‰ç…§è¿™ä¸ªæ­¥éª¤éå†
-     */
-    public static void inOrderTraverse(Node<?> root) {
-        //å…ˆè®¿é—®å·¦å­æ ‘
-        if (root.lchild != null) {
-            inOrderTraverse(root.lchild);
-        }
-
-        // å†è®¿é—®æ ¹èŠ‚ç‚¹
-        visitNode(root);
-
-        // æœ€åè®¿é—®å³å­æ ‘
-        if (root.rchild != null) {
-            inOrderTraverse(root.rchild);
-        }
-    }
-
-    /**
-     *  ä¸­åºéå†çš„å †æ ˆå®ç°å®ç°
-     */
-    public static void inOrderTraverseByStack(Node<?> root) {
-        Stack<Node<?>> stack = new Stack<Node<?>>();
-        stack.push(root);
-
-        while(!stack.isEmpty()){
-            //å…ˆè®¿é—®å·¦å­æ ‘
-            Node<?> node = stack.peek();
-            while(node != null){
-                node = node.lchild;
-                stack.push(node);
-            }
-            //ç©ºæŒ‡é’ˆé€€æ ˆ
-            stack.pop();
-
-            if(!stack.isEmpty()){
-                //è®¿é—®æ ¹èŠ‚ç‚¹
-                node = stack.pop();
-                visitNode(node);
-
-                //è®¿é—®å³å­æ ‘
-                stack.push(node.rchild);
-            }
-        }
-
-    }
-
-
-
-    /**
-     *  ååºéå†çš„è¿­ä»£å®ç°
-     *  1.å…ˆéå†å·¦å­æ ‘
-     *  2.å†éå†å³å­æ ‘
-     *  3.æœ€åéå†æ ¹èŠ‚ç‚¹
-     *
-     *	èŠ‚ç‚¹çš„å·¦å³å­æ ‘ä¹Ÿè¦æŒ‰ç…§è¿™ä¸ªæ­¥éª¤éå†
-     */
-    private static void postOrderTraverse(Node<?> root) {
-        // å…ˆè®¿é—®å·¦å­æ ‘
-        if (root.lchild != null) {
-            postOrderTraverse(root.lchild);
-        }
-
-        // å†è®¿é—®å³å­æ ‘
-        if (root.rchild != null) {
-            postOrderTraverse(root.rchild);
-        }
-
-        // æœ€åè®¿é—®æ ¹èŠ‚ç‚¹
-        visitNode(root);
-    }
-
-
-    /**
-     *  ååºéå†çš„å †æ ˆå®ç°å®ç°
-     */
-    public static void postOrderTraverseByStack(Node<?> root) {
-        Stack<Node<?>> stack = new Stack<Node<?>>();
-        stack.push(root);
-
-        Node<?> node = stack.pop();
-        Node<?> prev = node;
-        while(node != null || !stack.isEmpty()){
-            //å…ˆè®¿é—®å·¦å­æ ‘
-            while(node != null){
-                stack.push(node);
-                node = node.lchild;
-            }
-
-            //å†è®¿é—®å³å­æ ‘
-            if(!stack.isEmpty()){
-                node = stack.peek().rchild;
-
-                if(node == null || node == prev){
-                    node = stack.pop();
-                    //è®¿é—®æ ¹èŠ‚ç‚¹
-                    visitNode(node);
-                    prev = node;
-                    node = null;
-                }
-            }
-        }
-
-    }
-
-
-
-    public static void main(String[] args) {
-        Node<String> root = new Node<String>("A");
-        BinaryTree<String> tree = new BinaryTree<String>(root);
-
-        /* åˆ›å»ºå¦‚ä¸‹çš„æ ‘
-         * 				A
-         * 		B				C
-         * 	D		E		F
-         *
-         */
-
-        Node<String> temp = tree.insertLChild(root, new Node<String>("B"));
-        tree.insertLChild(temp, new Node<String>("D"));
-        tree.insertRChild(temp, new Node<String>("E"));
-        temp = tree.insertRChild(root, new Node<String>("C"));
-        tree.insertLChild(temp, new Node<String>("F"));
-
-        System.out.println("********å…ˆåºéå†çš„è¿­ä»£å®ç°**************");
-        BinaryTree.preOrderTraverse(root);
-        System.out.println("\n********ä¸­åºéå†çš„è¿­ä»£å®ç°**************");
-        BinaryTree.inOrderTraverse(root);
-        System.out.println("\n********ååºéå†çš„è¿­ä»£å®ç°**************");
-        BinaryTree.postOrderTraverse(root);
-
-        System.out.println("\n********å…ˆåºéå†çš„å †æ ˆå®ç°**************");
-        BinaryTree.preOrderTraverseByStack(root);
-        System.out.println("\n********ä¸­åºéå†çš„å †æ ˆå®ç°**************");
-        BinaryTree.inOrderTraverseByStack(root);
-        System.out.println("\n********ååºéå†çš„å †æ ˆå®ç°**************");
-        BinaryTree.postOrderTraverseByStack(root);
-
     }
 }

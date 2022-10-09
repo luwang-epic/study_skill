@@ -22,6 +22,10 @@ package com.wang.jdk.collection;
     这种自平衡的树叫做平衡树。平衡树（Balance Tree，BT）指的是：任意节点的子树的高度差都小于等于 1。
     常见的符合平衡树的有 AVL 树（二叉平衡搜索树），B 树（多路平衡搜索树，2-3 树，2-3-4 树中的一种），红黑树等。
 
+SB数（size balanced tree，大小平衡二叉树）
+    同一层的节点称为叔叔节点，叔叔节点的子节点为侄子节点。
+    任何一个叔叔节点的节点个数，不能少于任何一个侄子节点的节点个数，这样的排列方式使左子树和右子树相差不大
+
 平衡二叉搜索树（AVL数）
     指任意节点的两个子树的高度差不超过 1 的平衡树。
 
@@ -55,17 +59,52 @@ B 树
     类似二分查找，效率高，平均情况优良，插入和删除过程，不需要频繁的平衡操作
 
 
+删除操作为了保持还是搜索二叉树，需要将某个节点放到删除之后的顶点处：
+    1. 如果删除的节点没有左右还在，直接删除
+    2. 如果删除的节点只有左孩子或者右孩子，直接将左孩子或者右孩子挂到删除节点的父节点上
+    3. 如果删除的节点既有左孩子又有右孩子，则可以将删除节点的父节点的右子树中最左节点放到删除节点的位置
+
+删除或者增加节点后，会出现几种不平衡情况：
+    1. LL型：左子树不平衡
+    2. LR型：左子树的右子树不平衡
+    3. RR型：右子树不平衡
+    4. RL型：右子树的左子树不平衡
+
+为了保持平衡，需要进行左旋和右旋操作，
+    1. 左旋：将顶点向左旋转，该顶点的右孩子变为新顶点，旧的顶点作为左孩子放到新顶点上；
+        新顶点的左孩子（如果有），放到旧顶点的右孩子处
+    2. 右旋：将顶点向右旋转，该顶点的左孩子变为新顶点，旧的顶点作为右孩子放到新顶点上；
+        新顶点的右孩子（如果有），放到旧顶点的左孩子处
+如果进行旋转以及旋转之后还需要进行什么操作，根据由具体的数来决定，AVL和红黑树或者SB数各不相同
+
+
 红黑树的算法讲解参考：https://www.bilibili.com/video/BV1BB4y1X7u3
 TreeMap红黑数的具体实现参考：https://blog.csdn.net/chenssy/article/details/26668941
 
  */
+
+import java.util.TreeMap;
 
 // TreeMap的底层是通过红黑树算法来实现的
 public class TreeMapDemo {
 
 
     public static void main(String[] args) {
+        // 有序表的一些常规操作
+        TreeMap<Integer, String> treeMap = new TreeMap<>();
+        treeMap.put(7, "我是7");
+        treeMap.put(5, "我是5");
+        treeMap.put(4, "我是4");
+        treeMap.put(3, "我是3");
+        treeMap.put(9, "我是9");
+        treeMap.put(2, "我是2");
 
+        System.out.println("最小为：" + treeMap.firstKey());
+        System.out.println("最大为：" + treeMap.lastKey());
+        System.out.println("在表中所有<=8的数中，离8最近的为：" + treeMap.floorKey(8));
+        System.out.println("在表中所有>=8的数中，离8最近的为：：" + treeMap.ceilingKey(8));
+        System.out.println("在表中所有<=7的数中，离7最近的为：" + treeMap.floorKey(7));
+        System.out.println("在表中所有>=7的数中，离7最近的为：" + treeMap.ceilingKey(7));
     }
 
 }
