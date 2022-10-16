@@ -26,6 +26,10 @@ public class UnionFindStruct<T> {
     // 集合代表元素，也就是顶部元素 和 该集合的大小 映射
     private HashMap<Element<T>, Integer> sizeMap;
 
+    /**
+     * 构造函数，传入总的元素数，刚开始一个元素为一个集合，也就是每个元素在自己的集合中
+     * @param collection 总元素集合
+     */
     public UnionFindStruct(Collection<T> collection) {
         elementMap = new HashMap<>();
         fatherMap = new HashMap<>();
@@ -41,7 +45,7 @@ public class UnionFindStruct<T> {
 
 
     /**
-     * 判断a和b是否在同一个集合
+     * 查询操作，判断a和b是否在同一个集合
      * @param a 元素
      * @param b 另一个元素
      * @return 是否在同一个集合
@@ -55,7 +59,7 @@ public class UnionFindStruct<T> {
     }
 
     /**
-     * 将两个集合放到一起
+     * 合并操作，将两个集合放到一起
      * @param a 一个元素
      * @param b 另一个元素
      */

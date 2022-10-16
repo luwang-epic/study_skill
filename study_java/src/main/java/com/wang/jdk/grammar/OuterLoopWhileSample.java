@@ -13,9 +13,10 @@ public class OuterLoopWhileSample {
             switch (caseString) {
                 case "a":
                     caseString = "b";
-                    break;
+                    System.out.println("continue outerLoop --> 跳出到outerLoop处，然后继续循环");
+                    continue outerLoop;
                 case "b":
-                    System.out.println("跳出到outerLoop处，然后结束循环，继续往下执行");
+                    System.out.println("break outerLoop --> 跳出到outerLoop处，然后结束循环，继续往下执行");
                     break outerLoop;
             }
         }

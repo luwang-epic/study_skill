@@ -49,7 +49,7 @@ Filter & Interceptor & AOP 区别和联系
     过滤器可以拦截到方法的请求和响应(ServletRequest request, ServletResponse response)，
         并对请求响应做出像响应的过滤操作，比如设置字符编码，鉴权操作等
 
-    Interceptor是基于Java的反射机制（APO思想）进行实现，不依赖Servlet容器。因此拦截器既可以用于Web程序，也可以用于Application、Swing程序中。
+    Interceptor是基于Java的反射机制（AOP思想）进行实现，不依赖Servlet容器。因此拦截器既可以用于Web程序，也可以用于Application、Swing程序中。
     拦截器可以在方法执行之前(preHandle)和方法执行之后(afterCompletion)进行操作，回调操作(postHandle)，可以获取执行的方法的名称，请求(HttpServletRequest)
     Interceptor可以通过IoC容器来管理，因此可以通过注入等方式来获取其他Bean的实例，因此使用会更方便。
     Interceptor可以控制请求的控制器和方法，但控制不了请求方法里的参数(只能获取参数的名称，不能获取到参数的值)
@@ -62,7 +62,7 @@ Filter & Interceptor & AOP 区别和联系
  */
 
 /**
- * 由于redis已经关闭了，所以排查这个自动配置，否则由于连不上redis会导致服务启动失败
+ * 由于redis已经关闭了，所以排除这个自动配置，否则由于连不上redis会导致服务启动失败
  */
 @SpringBootApplication (exclude = {RedisAutoConfiguration.class})
 @EnableAdminServer

@@ -1,69 +1,56 @@
 package com.wang.table;
 
-import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
-import org.apache.flink.table.descriptors.Csv;
-import org.apache.flink.table.descriptors.FileSystem;
-import org.apache.flink.table.descriptors.Schema;
-import org.apache.flink.types.Row;
 
+/**
+ * flink的表api
+ */
 public class TableApiSample {
 
-    public static void main(String[] args) throws Exception {
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        StreamTableEnvironment tEnv = TableEnvironment.getTableEnvironment(env);
-        tEnv.connect(
-                        new FileSystem()
-                                .path("file:///D:\\idea_project\\study_skill\\file\\table.txt")
-                ).withFormat(
-                        new Csv()
-                                .field("id", Types.STRING)
-                                .field("name", Types.STRING)
-                                .field("idCard", Types.STRING)
-                                .field("addressCode", Types.STRING)
-                                .field("age", Types.INT)
-                                .fieldDelimiter(",")
-                                .lineDelimiter("\n")
-                                .ignoreParseErrors()
-                ).withSchema(
-                        new Schema()
-                                .field("id", Types.STRING)
-                                .field("name", Types.STRING)
-                                .field("idCard", Types.STRING)
-                                .field("addressCode", Types.STRING)
-                                .field("age", Types.INT)
-                )
-                .inAppendMode()
-                .registerTableSource("sensor");
-        Table table = tEnv.sqlQuery("select id,name,idCard,addressCode,age from sensor");
-        tEnv.toAppendStream(table, Row.class).print();
+    public static void main(String[] args) throws Exception{
+        // 创建执行环境的两种方式，流方式 & 表方式
+        // 1 创建执行环境(流方式创建)
+        //        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        //        env.setParallelism(1);
+        //        StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
 
-        tEnv.connect(
-                        new FileSystem()
-                                .path("file:///D:\\idea_project\\study_skill\\file\\table_result.txt")
-                ).withFormat(
-                        new Csv()
-                                .field("id", Types.STRING)
-                                .field("name", Types.STRING)
-                                .field("idCard", Types.STRING)
-                                .field("addressCode", Types.STRING)
-                                .field("age", Types.INT)
-                                .fieldDelimiter(",")
-                ).withSchema(
-                        new Schema()
-                                .field("id", Types.STRING)
-                                .field("name", Types.STRING)
-                                .field("idCard", Types.STRING)
-                                .field("addressCode", Types.STRING)
-                                .field("age", Types.INT)
-                )
-                .inAppendMode()
-                .registerTableSink("sensorOut");
-        env.setParallelism(1);
-        table.insertInto("sensorOut");
-        env.execute(" test ");
+        // 2 创建执行环境(表方式创建) 基于alibaba 的 blink planner实现
+        EnvironmentSettings settings = EnvironmentSettings.newInstance()
+                // 流模式还是批模式，默认是流
+                .inStreamingMode()
+                //.inBatchMode()
+                // 计划器，默认为BlinkPlanner，还有被废弃的useOldPlanner
+                .useBlinkPlanner()
+                .build();
+        TableEnvironment tableEnv = TableEnvironment.create(settings);
+
+        // 3 创建一张连接器表（输入表）
+        String createInDDL = "CREATE TABLE clickTable (" +
+                "user_name STRING, " +
+                "url STRING, " +
+                "ts BIGINT " +
+                ") WITH (" +
+                " 'connector' = 'filesystem'," +
+                " 'path' = 'D:/idea_project/study_skill/file/flink/clicks.txt'," +
+                " 'format' = 'csv'" +
+                ")";
+        tableEnv.executeSql(createInDDL);
+
+        // 执行聚合统计查询转换
+        Table eggResult = tableEnv.sqlQuery("select user_name,COUNT(url) as cnt from clickTable group by user_name");
+
+        // 创建一张控制台打印的一张表
+        String createPrintOutDDL = "CREATE TABLE printOutTable (" +
+                "user_name STRING, " +
+                "cnt BIGINT " +
+                ") WITH (" +
+                " 'connector' = 'print' " +
+                ")";
+        tableEnv.executeSql(createPrintOutDDL);
+
+        // 输出到控制台 +I表示插入，-U表示更新前的数据，+U表示更新后的数据
+        eggResult.executeInsert("printOutTable");
     }
 }

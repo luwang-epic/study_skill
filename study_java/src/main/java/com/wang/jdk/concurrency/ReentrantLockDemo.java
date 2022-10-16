@@ -36,6 +36,8 @@ synchronized中，锁对象的wait()和notify()或notifyAll()方法可以实现�
 JDK1.5，synchronized还有很大的优化余地。JDK 1.6 中加入了很多针对锁的优化措施，
 synchronized与ReentrantLock性能方面基本持平。虚拟机在未来的改进中更偏向于原生的synchronized。
 
+区别六：lock可以实现读写锁，从而提高多线程读的效率
+
 相同点：都是可重入的。可重入指同一个线程多次试图获取它所占的锁，请求会成功。当释放的时候，直到重入次数清零，锁才释放。
  */
 public class ReentrantLockDemo {

@@ -14,8 +14,10 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <flink.version>1.7.0</flink.version>
-        <scala.version>2.11</scala.version>
+        <flink.version>1.13.0</flink.version>
+        <scala.binary.version>2.12</scala.binary.version>
+        <slf4j.version>1.7.30</slf4j.version>
+        <hbase.version>2.4.11</hbase.version>
     </properties>
 
 
@@ -26,38 +28,127 @@
             <version>${flink.version}</version>
         </dependency>
 
+        <!-- 因为在本地调试时，本地程序相当于一个flink的客户端，所以需要添加flink客户端依赖，才能在本地正常启动程序。 -->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-java_${scala.version}</artifactId>
+            <artifactId>flink-clients_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table_${scala.version}</artifactId>
-            <version>${flink.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-scala_${scala.version}</artifactId>
-            <version>${flink.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-scala_${scala.version}</artifactId>
+            <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
         </dependency>
 
         <!--kafka connector-->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kafka_${scala.version}</artifactId>
+            <artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
         </dependency>
+
+        <!-- 使用table api 引入的依赖，使用桥接器和底层datastream api连接支持-->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-api-java-bridge_${scala.binary.version}</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
+        <!--如果需要在本地运行table api和sql 还需要引入一下依赖-->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
+        <!--连接外部数据格式解析,采用csv方式来解析-->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-csv</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
+        <!-- cep需要引入的包 -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-cep_${scala.binary.version}</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
+        <!-- 使用scala的api需要引入的包-->
+        <!--        <dependency>-->
+<!--            <groupId>org.apache.flink</groupId>-->
+<!--            <artifactId>flink-scala_${scala.version}</artifactId>-->
+<!--            <version>${flink.version}</version>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.apache.flink</groupId>-->
+<!--            <artifactId>flink-streaming-scala_${scala.version}</artifactId>-->
+<!--            <version>${flink.version}</version>-->
+<!--        </dependency>-->
+
+
+        <!-- 引入日志管理相关依赖-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-to-slf4j</artifactId>
+            <version>2.14.0</version>
+        </dependency>
+
+        <!-- hbase依赖 -->
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-client</artifactId>
+            <version>${hbase.version}</version>
+        </dependency>
+
     </dependencies>
 
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

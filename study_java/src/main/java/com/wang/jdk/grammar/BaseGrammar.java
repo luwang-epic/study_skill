@@ -83,7 +83,7 @@ public class BaseGrammar {
 
     Java为了避免产生大量的String对象，设计了一个字符串常量池。工作原理是这样的，创建一个字符串时，
     JVM首先为检查字符串常量池中是否有值相等的字符串，如果有，则不再创建，直接返回该字符串的引用地址，
-    若没有，则创建，然后放到字符串常量池中，并返回新创建的字符串的引用地址。所以上面s1与s2引用地址相同。
+    若没有，则创建，然后放到字符串常量池中，并返回新创建的字符串的引用地址。所以下面s1与s2引用地址相同。
 
     那为什么s3与s1、s2引用的不是同一个字符串地址呢？ String s3=new String(“Hello”);
     JVM首先是在字符串常量池中找"Hello” 字符串，如果没有创建字符串常量，然后放到常量池中，
@@ -117,7 +117,7 @@ public class BaseGrammar {
         // System.identityHashCode(Object)方法可以返回对象的内存地址,
         // 不管该对象的类是否重写了hashCode()方法
         System.out.println(System.identityHashCode(s1));
-        System.out.println(System.identityHashCode(s3.hashCode()));
+        System.out.println(System.identityHashCode(s3));
 
     }
 
@@ -176,8 +176,8 @@ public class BaseGrammar {
     private int tryCatchFinallyGrammar() {
         /*
         finally 是在 return 后面的表达式运算后执行的（此时并没有返回运算后的值，
-        而是先把要返回的值保存起来，管 finally 中的代码怎么样，返回的值都不会改变，
-        任然是之前保存的值），所以函数返回值是在 finally 执行前确定的；
+        而是先把要返回的值保存起来，不管finally中的代码怎么样，返回的值都不会改变，
+        仍然是之前保存的值），所以函数返回值是在 finally 执行前确定的；
          */
         int result = -1;
         try {
@@ -625,7 +625,7 @@ public class BaseGrammar {
             存、取操作锁分离，所以使用有并发和吞吐量要求的场景。
             Executors,newFixedThreadPool()线程池的默认队列就是使用该类型的
         3. LinkedTransferQueue：由链表组成的无界队列
-
+            加入的元素必须被消费才可以继续加入，具体看：com.wang.jdk.collection.TransferQueueDemo
         4. PriorityBlockingQueue：优先级排序的无界阻塞队列
             基于数组实现，队列容量最大值为Integer.MAX_VALUE-8（-8是因为数组的对象头）。根据传入的优先级进行排序，保证优先级来消费。
             优先级阻塞队列中存在一次排序，根据优先级来将数据放入到头部或者尾部；
@@ -729,7 +729,7 @@ public class BaseGrammar {
             }
         }
 
-        // 会抛异常，foreach是通过迭代器迭代的
+        // 不会抛异常，foreach是通过迭代器迭代的
         for (String str : strs) {
             strs.remove("a");
         }
@@ -751,7 +751,9 @@ public class BaseGrammar {
         new Thread(() -> {
             try {
                 runLatch.await();
+                System.out.println("pre add d");
                 vectors.add("d");
+                System.out.println("post add d");
                 forLatch.countDown();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -763,10 +765,59 @@ public class BaseGrammar {
             forLatch.await();
             System.out.println(str);
         }
+
+        // 会出现死循环，这个会拿锁，而add方法也需要拿锁（但是拿不到，所以会停的add方法处），所以死锁了
+        //vectors.forEach(str -> {
+        //    try {
+        //        runLatch.countDown();
+        //        System.out.println("pre await");
+        //        forLatch.await();
+        //        System.out.println("post await");
+        //        System.out.println(str);
+        //    } catch (Exception e) {
+        //        e.printStackTrace();
+        //    }
+        //});
         /* 一般有2种解决办法：
         　　1）在使用iterator迭代的时候使用synchronized或者Lock进行同步；
         　　2）使用并发容器CopyOnWriteArrayList代替ArrayList和Vector。
         */
+    }
+
+
+    @Test
+    public void jdkConcurrentHashMapGrammar() throws Exception {
+        ConcurrentHashMap<String, String> concurrentHashMap = new ConcurrentHashMap<>();
+        concurrentHashMap.put("a", "b");
+
+        CountDownLatch runLatch = new CountDownLatch(1);
+        CountDownLatch forLatch = new CountDownLatch(1);
+        new Thread(() -> {
+            try {
+                runLatch.await();
+                concurrentHashMap.put("aa", "aa");
+                forLatch.countDown();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+        // 不会抛ConcurrentModificationException异常
+        //for (Map.Entry<String, String> entry : concurrentHashMap.entrySet()) {
+        //    runLatch.countDown();
+        //    forLatch.await();
+        //    System.out.println(entry.getKey() + " : " + entry.getValue());
+        //}
+
+        // 不会抛ConcurrentModificationException异常
+        concurrentHashMap.forEach((key, value) -> {
+            try {
+                runLatch.countDown();
+                forLatch.await();
+                System.out.println(key + " : " + value);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Test
