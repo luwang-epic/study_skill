@@ -21,7 +21,7 @@
         <dependency>
             <groupId>org.apache.thrift</groupId>
             <artifactId>libthrift</artifactId>
-            <version>0.17.0</version>
+            <version>0.15.0</version>
         </dependency>
 
         <dependency>
@@ -39,9 +39,18 @@
                 <artifactId>maven-thrift-plugin</artifactId>
                 <version>0.1.11</version>
                 <configuration>
-                    <thriftExecutable>D:/java/local/thrift/thrift.exe</thriftExecutable>
-                    <thriftSourceRoot>src/main/java/com/wang/rpc/thrift</thriftSourceRoot>
-                    <outputDirectory>src/main/java</outputDirectory>
+                    <!-- 如果配置了环境变量，这个可以不些 -->
+                    <!-- <thriftExecutable>D:/java/local/thrift/thrift.exe</thriftExecutable> -->
+                    <!-- 源文件所在的目录 -->
+                    <thriftSourceRoot>src/main/thrift</thriftSourceRoot>
+                    <!-- 如果制定了输出目录，会先删除这个目录下的所有文件，这个需要慎重；
+                            默认会在target/generated-sources/thrift中生成代码，
+                            可以将这个目前添加为source，从而可以正常使用，打包也不会影响。
+                            如果不使用这个默认目录，可以使用一个额外的目录，然后将生成的代码类copy到类对应的包下，
+                            这样会比较麻烦，每次修改都需要重新copy，否则会不一致-->
+                    <!-- <outputDirectory>src/main/output</outputDirectory> -->
+                    <!-- 这个需要加，否则一直编译不成功 -->
+                    <generator>java</generator>
                 </configuration>
                 <executions>
                     <execution>
