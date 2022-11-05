@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>study_skill</artifactId>
+        <groupId>com.wang</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>study_rpc</artifactId>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.thrift</groupId>
+            <artifactId>libthrift</artifactId>
+            <version>0.17.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--   maven thrift插件  因为依赖thrift生成的类，因此需要编译之前生成   -->
+            <plugin>
+                <groupId>org.apache.thrift.tools</groupId>
+                <artifactId>maven-thrift-plugin</artifactId>
+                <version>0.1.11</version>
+                <configuration>
+                    <thriftExecutable>D:/java/local/thrift/thrift.exe</thriftExecutable>
+                    <thriftSourceRoot>src/main/java/com/wang/rpc/thrift</thriftSourceRoot>
+                    <outputDirectory>src/main/java</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>thrift-sources</id>
+                        <!-- 生成时期，编译之前，因此需要生成源这个阶段来生成代码 -->
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <!-- <execution> -->
+                    <!--     <id>thrift-test-sources</id> -->
+                    <!--     <phase>generate-test-sources</phase> -->
+                    <!--     <goals> -->
+                    <!--         <goal>testCompile</goal> -->
+                    <!--     </goals> -->
+                    <!-- </execution> -->
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

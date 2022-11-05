@@ -54,6 +54,11 @@ package com.wang.jvm.classloader;
     它是用户自定义类加载器的默认父加载器
     通过 ClassLoader 的 getSystemClassLoader() 方法可以获取到该类加载器
 
+自定义java.lang.String类，但是在加载自定义String类的时候会率先使用引导类加载器加载，
+而引导类加载器在加载的过程中会先加载JDK自带的文件（rt.jar包中java\lang\String.class），
+这样可以保证对Java核心源代码的保护，从而自定义的和jdk中一样的类（包名和类名都一样）无效，
+不会覆盖jdk中的类，这就是沙箱安全机制。
+
 Class.forName() 与 ClassLoader.loadClass()
     Class.forName()：是一个静态方法，最常用的是 Class.forName(String className)；
         根据传入的类的权限定名返回一个 Class 对象。该方法在将 Class 文件加载到内存的同时，会执行类的初始化。如：

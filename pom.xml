@@ -20,6 +20,7 @@
         <module>study_janusgraph</module>
         <module>study_kafka</module>
         <module>study_spring</module>
+        <module>study_rpc</module>
     </modules>
 
     <properties>

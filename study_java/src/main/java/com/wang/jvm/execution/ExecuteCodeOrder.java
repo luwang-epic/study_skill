@@ -1,4 +1,4 @@
-package com.wang.jvm.execute;
+package com.wang.jvm.execution;
 
 import java.util.concurrent.CountDownLatch;
 
