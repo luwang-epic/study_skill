@@ -1,0 +1,39 @@
+// 使用proto3语法
+syntax = "proto3";
+
+// 是否生成多个类，false只生成一个大类，包括若干个子类
+option java_multiple_files = false;
+
+// 生成java类所在的包
+option java_package = "com.wang.rpc.protobuf.sms";
+
+// 生成的外层类的类名
+option java_outer_classname = "SmsProto";
+
+// .proto包名，不需要放到这个包下，只是proto文件逻辑上的包名
+package sms;
+
+// 定义RPC服务的的接口
+service SmsService {
+  // 返回值使用stream关键字，表示是服务端流式通信模式，这样可以向客户端发送多个回应
+  rpc send(SmsRequest) returns (stream SmsResponse) { }
+  // 返回值使用stream关键字，表示是客户端流式通信模式，这样可以向服务端发送多个请求
+  rpc createPhone(stream PhoneNumberRequest) returns (stream PhoneNumberResponse) { }
+}
+
+message SmsRequest {
+  repeated string phoneNumber = 1;
+  string content = 2;
+}
+
+message SmsResponse {
+  string result = 1;
+}
+
+message PhoneNumberRequest {
+  string phoneNumber = 1;
+}
+
+message PhoneNumberResponse {
+  string result = 1;
+}

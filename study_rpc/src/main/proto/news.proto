@@ -1,0 +1,50 @@
+// 先要在pom文件中配置相关的protobuf插件
+// 然后直接在idea的右侧maven中找到study_rpc项目，打开Plugins，就可以看到protobuf的插件了
+// protobuf:compile是生成存根类，protobuf:compile-custom是生成grpc通信类；双击运行
+// 在target/generated-sources/protobuf/java文件夹下面可以看到生成的包和存根类
+//      在idea中右击将其设置源码目录，就可以直接在项目中使用了
+// 在target/generated-sources/protobuf/grpc-java文件夹下面可以看到生成的包和rpc类，
+//      在idea中右击将其设置源码目录，就可以直接在项目中使用了
+//      可以基于这个扩展来写服务端业务代码，这样会比较方便
+//
+
+// 使用proto3语法
+syntax = "proto3";
+
+// 是否生成多个类，false只生成一个大类，包括若干个子类
+option java_multiple_files = false;
+
+// 生成java类所在的包
+option java_package = "com.wang.rpc.protobuf.news";
+
+// 生成的外层类的类名
+option java_outer_classname = "NewsProto";
+
+// .proto包名，不需要放到这个包下，只是proto文件逻辑上的包名
+package news;
+
+// 定义RPC服务的的接口
+service NewsService {
+
+  // list方法名，NewsRequest代表参数， NewsResponse代表返回对象
+  rpc list(NewsRequest) returns (NewsResponse) { }
+}
+
+message NewsRequest {
+  // string是类型，date是变量， 1表示编号
+  string date = 1;
+}
+
+message NewsResponse {
+  //  repeated说明是一个集合（数组），数组每个元素都是News对象
+  repeated News news = 1;
+}
+
+// News新闻实体对象
+message News {
+  // 如果以后有中间字段需要插入的话，需要在之间预留一些编号，不使用连续的，否则将不能插入，只能放到后面
+  int32 id = 1;
+  string title = 2;
+  string content = 3;
+  int64 createTime = 4;
+}

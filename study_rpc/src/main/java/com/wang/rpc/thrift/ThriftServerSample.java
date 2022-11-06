@@ -1,5 +1,22 @@
 package com.wang.rpc.thrift;
 
+import com.wang.rpc.thrift.api.User;
+import com.wang.rpc.thrift.api.UserService;
+import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TCompactProtocol;
+import org.apache.thrift.server.THsHaServer;
+import org.apache.thrift.server.TNonblockingServer;
+import org.apache.thrift.server.TServer;
+import org.apache.thrift.server.TSimpleServer;
+import org.apache.thrift.server.TThreadPoolServer;
+import org.apache.thrift.server.TThreadedSelectorServer;
+import org.apache.thrift.transport.TNonblockingServerSocket;
+import org.apache.thrift.transport.TServerSocket;
+import org.apache.thrift.transport.TServerTransport;
+import org.apache.thrift.transport.TTransportException;
+import org.apache.thrift.transport.layered.TFramedTransport;
+
 /*
 Thrift官网：https://thrift.apache.org/
     可以参考帮助文档，示例以及idl语言，以及下载相关编译程序等
@@ -86,25 +103,10 @@ TThreadedSelectorServer
         3.一个负载均衡器 SelectorThreadLoadBalancer对象，主要用于AcceptThread线程接受到一个新的socket连接请求的时候，将这个新的连接请求分配到那个SelectorThread线程
         4.一个ExecutorService类型的工作线程池，在SelectorThread的线程中，监听到有业务的socket中有调用请求过来，则将请求的数据如读取之后，交给ExecutorSErvice线程池完成此次调用的具体操作，主要用于处理每个rpc请求的handler回调处理
 
+参考：
+    B站：https://www.bilibili.com/video/BV1f54y1o7Cm
+    博客：https://blog.csdn.net/qq_42511550/article/details/124145251
  */
-
-import com.wang.rpc.thrift.api.User;
-import com.wang.rpc.thrift.api.UserService;
-import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.protocol.TCompactProtocol;
-import org.apache.thrift.server.THsHaServer;
-import org.apache.thrift.server.TNonblockingServer;
-import org.apache.thrift.server.TServer;
-import org.apache.thrift.server.TSimpleServer;
-import org.apache.thrift.server.TThreadPoolServer;
-import org.apache.thrift.server.TThreadedSelectorServer;
-import org.apache.thrift.transport.TNonblockingServerSocket;
-import org.apache.thrift.transport.TServerSocket;
-import org.apache.thrift.transport.TServerTransport;
-import org.apache.thrift.transport.TTransportException;
-import org.apache.thrift.transport.layered.TFramedTransport;
-
 /**
  * 服务端代码
  */

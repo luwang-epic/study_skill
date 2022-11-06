@@ -18,20 +18,49 @@
     </properties>
 
     <dependencies>
+        <!-- thrift需要的依赖包 -->
         <dependency>
             <groupId>org.apache.thrift</groupId>
             <artifactId>libthrift</artifactId>
             <version>0.15.0</version>
         </dependency>
 
+        <!-- thrift需要的日志依赖包 -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.25</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+            <version>1.42.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>1.42.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>1.42.0</version>
+        </dependency>
     </dependencies>
 
     <build>
+        <!-- protobuf需要排除这个，否则编译出错 -->
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.6.2</version>
+            </extension>
+        </extensions>
+
         <plugins>
             <!--   maven thrift插件  因为依赖thrift生成的类，因此需要编译之前生成   -->
             <plugin>
@@ -68,6 +97,35 @@
                     <!--         <goal>testCompile</goal> -->
                     <!--     </goals> -->
                     <!-- </execution> -->
+                </executions>
+            </plugin>
+
+            <!-- protobuf maven插件 -->
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>0.6.1</version>
+                <configuration>
+                    <pluginId>grpc-java</pluginId>
+                    <!-- 通过这个来生成代码 -->
+                    <protocArtifact>com.google.protobuf:protoc:3.17.3:exe:${os.detected.classifier}</protocArtifact>
+                    <!-- 这个插件可以进一步简化开发 -->
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.42.0:exe:${os.detected.classifier}</pluginArtifact>
+
+                    <!-- 默认为src/main/proto文件夹下的proto文件来进行编译生成代码 -->
+                    <!-- <protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot> -->
+                    <!-- 生成的Java文件目录，默认是target/generated-sources/protobuf下面 -->
+                    <!--<outputDirectory>${project.build.directory}/generated-sources/protobuf</outputDirectory>-->
+                    <!-- 是否清空输出文件，默认为是，如果是，outputDirectory下的项目工程会被清空。 -->
+                    <!-- <clearOutputDirectory>false</clearOutputDirectory> -->
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>compile-custom</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
