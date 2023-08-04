@@ -195,6 +195,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.3.4.RELEASE</version>
                 <!-- 线上环境打包去除一些开发用的包，如配置提示包 -->
                 <configuration>
                     <excludes>

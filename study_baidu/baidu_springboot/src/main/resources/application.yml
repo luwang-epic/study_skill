@@ -1,0 +1,22 @@
+server.port: 8902
+
+project:
+  tsdb:
+    vm:
+      maxBatchSize: 10
+      maxBatchCount: 2
+      lingerMillSeconds: 100
+      sendThreadCount: 1
+      client:
+        url: "http://localhost:8428/api/v1/write"
+        needCompress: "true"
+        connTimeoutMillis: 3000
+        socketTimeoutMillis: 3000
+        maxConnTotal: 10
+        maxConnPerRoute: 10
+
+bcm:
+  info-flow:
+    url: http://apiin.im.baidu.com/api/msg/groupmsgsend?access_token=d4a67307abdde3ab6ee15079e2ebf7e29
+    groupIds:
+      - 8347535
